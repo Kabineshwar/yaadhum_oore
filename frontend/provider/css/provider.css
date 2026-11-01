@@ -8,6 +8,7 @@ body {
     margin: 0;
     background: #f4f7fb;
     color: #222;
+    line-height: 1.6;
 }
 
 header {
@@ -36,6 +37,10 @@ nav a {
     color: #176b5b;
     font-weight: bold;
     margin-right: 25px;
+}
+
+nav a:hover {
+    text-decoration: underline;
 }
 
 main {
@@ -103,6 +108,14 @@ textarea {
     border: 1px solid #ccc;
     border-radius: 5px;
     font: inherit;
+    background: white;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #176b5b;
+    border-color: #176b5b;
 }
 
 textarea {
@@ -118,8 +131,28 @@ form button {
     font-size: 13px;
 }
 
+#message {
+    font-weight: bold;
+}
+
 footer {
     text-align: center;
     padding: 18px;
     color: #666;
+}
+
+@media (max-width: 600px) {
+    nav a {
+        display: inline-block;
+        margin: 5px 15px 5px 0;
+    }
+
+    main {
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+
+    form {
+        padding: 18px;
+    }
 }
