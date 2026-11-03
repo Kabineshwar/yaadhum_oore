@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provider Profile - YAADHUM OOORE</title>
+    <link rel="stylesheet" href="css/provider.css">
+</head>
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Local Tourism Provider Portal</p>
+    </header>
+
+    <nav>
+        <a href="provider-dashboard.html">Dashboard</a>
+        <a href="my-packages.html">My Packages</a>
+        <a href="add-package.html">Add Package</a>
+        <a href="provider-bookings.html">Bookings</a>
+        <a href="provider-profile.html">My Profile</a>
+    </nav>
+
+    <main>
+        <h2>My Provider Profile</h2>
+        <p>View and update your personal and business details.</p>
+
+        <form>
+
+            <label for="name">Provider Name</label>
+            <input type="text" id="name" value="Arun Kumar" required>
+
+            <label for="email">Email Address</label>
+            <input type="email" id="email" value="arun@example.com" required>
+
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" value="9876543210" required>
+
+            <label for="business">Business Name</label>
+            <input type="text" id="business" value="Arun Travels" required>
+
+            <label for="location">Business Location</label>
+            <input type="text" id="location" value="Ooty, Tamil Nadu" required>
+
+            <label for="description">About Your Business</label>
+            <textarea id="description" rows="4">We provide local tourism and sightseeing packages.</textarea>
+
+            <button type="submit">Save Profile</button>
+
+        </form>
+
+        <p class="note">
+            Profile information will be saved to the database after backend integration.
+        </p>
+    </main>
+
+    <footer>
+        <p>YAADHUM OOORE | Explore Your World</p>
+    </footer>
+
+</body>
+</html>
