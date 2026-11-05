@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore and book curated tourism packages in Tamil Nadu. Filter by destination, price, duration, and category with guaranteed seat availability.">
+  <title>Tourism Packages | YAADHUM OOORE</title>
+  
+  <!-- Shared Customer Design System -->
+  <link rel="stylesheet" href="css/customer.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container">
+      <span class="tamil-phrase" style="color: var(--color-gold);">"யாதும் ஊரே யாவரும் கேளிர்"</span>
+      &nbsp;&bull;&nbsp; To us all towns are one, all people our kin &nbsp;&bull;&nbsp;
+      <strong>Curated Local Tourism Packages</strong>
+    </div>
+  </div>
+
+  <!-- Primary Header & Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="nav-wrapper">
+        
+        <!-- Brand Logo -->
+        <a href="../index.html" class="brand-logo" aria-label="YAADHUM OOORE Home">
+          <div class="logo-badge">ய</div>
+          <div class="brand-text-group">
+            <span class="brand-title">YAADHUM OOORE</span>
+            <span class="brand-subtitle">Local Tourism Platform</span>
+          </div>
+        </a>
+
+        <!-- Mobile Navigation Toggle -->
+        <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu">
+          &#9776;
+        </button>
+
+        <!-- Main Navigation Links -->
+        <nav class="nav-links" id="mainNav">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="destinations.html" class="nav-link">Destinations</a>
+          <a href="packages.html" class="nav-link active">Packages</a>
+          <a href="search-packages.html" class="nav-link">Search</a>
+          <a href="compare.html" class="nav-link">Compare</a>
+          <a href="wishlist.html" class="nav-link">Wishlist</a>
+        </nav>
+
+        <!-- Navigation Actions -->
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-secondary btn-sm">Log In</a>
+          <a href="register.html" class="btn btn-primary btn-sm">Register</a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Page Hero Banner -->
+    <section class="page-hero">
+      <div class="container">
+        <div class="page-hero-breadcrumb">
+          <a href="../index.html">Home</a> &rsaquo; <span>Packages</span>
+        </div>
+        <h1 class="page-hero-title">Discover Handcrafted Packages</h1>
+        <p class="page-hero-subtitle">
+          Transparent pricing, authentic local itineraries, and verified capacity across Tamil Nadu's finest destinations.
+        </p>
+      </div>
+    </section>
+
+    <!-- Catalog Section with Filter Sidebar -->
+    <section class="section" style="padding-top: var(--space-xl);">
+      <div class="container">
+        
+        <!-- Academic Demonstration Notice -->
+        <div class="alert alert-demo is-visible" style="margin-bottom: 24px;">
+          <strong>Academic Demonstration Mode:</strong> Tourism packages are rendered dynamically from the centralized client dataset. Live filtering by destination, price, duration, rating, and sorting are fully interactive while backend integration (Person 2) progresses.
+        </div>
+
+        <div class="catalog-layout">
+          
+          <!-- Filter Sidebar -->
+          <aside class="filter-sidebar">
+            <div class="filter-sidebar-header">
+              <span class="filter-sidebar-title">Filter Packages</span>
+              <button type="button" id="clearFiltersBtn" class="clear-filters-btn" title="Reset all filters">Clear All</button>
+            </div>
+
+            <form id="packagesFilterForm">
+              
+              <!-- Filter: Destination -->
+              <div class="filter-section">
+                <label for="filterDestination" class="filter-section-title">Destination</label>
+                <select id="filterDestination" name="destination" class="form-select">
+                  <option value="all">All Destinations</option>
+                  <option value="Ooty">Ooty</option>
+                  <option value="Kodaikanal">Kodaikanal</option>
+                  <option value="Valparai">Valparai</option>
+                  <option value="Pollachi">Pollachi</option>
+                  <option value="Madurai">Madurai</option>
+                  <option value="Thanjavur">Thanjavur</option>
+                  <option value="Rameswaram">Rameswaram</option>
+                  <option value="Mahabalipuram">Mahabalipuram</option>
+                  <option value="Chettinad">Chettinad</option>
+                  <option value="Kanyakumari">Kanyakumari</option>
+                  <option value="Yercaud">Yercaud</option>
+                  <option value="Coimbatore">Coimbatore</option>
+                </select>
+              </div>
+
+              <!-- Filter: Category -->
+              <div class="filter-section">
+                <label for="filterCategory" class="filter-section-title">Experience Category</label>
+                <select id="filterCategory" name="category" class="form-select">
+                  <option value="all">All Categories</option>
+                  <option value="hills">Hills & Plantations</option>
+                  <option value="heritage">Heritage & Temples</option>
+                  <option value="coastal">Coastal Escapes</option>
+                  <option value="nature">Nature & Wildlife</option>
+                  <option value="cultural">Culinary & Culture</option>
+                </select>
+              </div>
+
+              <!-- Filter: Price Range -->
+              <div class="filter-section">
+                <span class="filter-section-title">Price Range (&#8377;)</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <div>
+                    <label for="filterMinPrice" class="form-help" style="margin: 0 0 4px 0; display: block;">Min (&#8377;)</label>
+                    <input type="number" id="filterMinPrice" name="minPrice" class="form-input" placeholder="1000" min="500" step="100">
+                  </div>
+                  <div>
+                    <label for="filterMaxPrice" class="form-help" style="margin: 0 0 4px 0; display: block;">Max (&#8377;)</label>
+                    <input type="number" id="filterMaxPrice" name="maxPrice" class="form-input" placeholder="8000" min="1000" step="500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Filter: Duration -->
+              <div class="filter-section">
+                <label for="filterDuration" class="filter-section-title">Trip Duration</label>
+                <select id="filterDuration" name="duration" class="form-select">
+                  <option value="all">Any Duration</option>
+                  <option value="1-2">1 - 2 Days (Weekend Trip)</option>
+                  <option value="3-4">3 - 4 Days (Short Holiday)</option>
+                  <option value="5+">5+ Days (Extended Tour)</option>
+                </select>
+              </div>
+
+              <!-- Filter: Rating -->
+              <div class="filter-section">
+                <label for="filterRating" class="filter-section-title">Minimum Rating</label>
+                <select id="filterRating" name="rating" class="form-select">
+                  <option value="">Any Rating</option>
+                  <option value="4.8">&#9733; 4.8 & Above (Exceptional)</option>
+                  <option value="4.6">&#9733; 4.6 & Above (Highly Rated)</option>
+                  <option value="4.0">&#9733; 4.0 & Above (Good)</option>
+                </select>
+              </div>
+
+            </form>
+          </aside>
+
+          <!-- Main Catalog Content -->
+          <div class="catalog-main">
+            
+            <!-- Toolbar: Count & Sorting -->
+            <div class="catalog-toolbar">
+              <div class="results-count">
+                Showing <strong id="packagesCount">14 Packages</strong>
+              </div>
+
+              <div class="sort-group">
+                <label for="packagesSortSelect">Sort By:</label>
+                <select id="packagesSortSelect" class="sort-select">
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="rating-desc">Highest Rated</option>
+                  <option value="duration-asc">Shortest Duration</option>
+                  <option value="duration-desc">Longest Duration</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Packages Cards Grid (Hydrated by customer.js) -->
+            <div class="grid-2" id="packagesGrid">
+              <!-- Dynamically rendered by PackageService.renderGrid() -->
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        
+        <div class="footer-col">
+          <h3 class="footer-brand-title">YAADHUM OOORE</h3>
+          <p class="footer-tagline">"யாதும் ஊரே யாவரும் கேளிர்"</p>
+          <p class="footer-desc">
+            An academic local tourism platform connecting travellers with authentic experiences across Tamil Nadu.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="../index.html" class="footer-link">Home</a></li>
+            <li><a href="destinations.html" class="footer-link">Destinations</a></li>
+            <li><a href="packages.html" class="footer-link">Packages</a></li>
+            <li><a href="search-packages.html" class="footer-link">Search</a></li>
+            <li><a href="compare.html" class="footer-link">Compare Tours</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Customer Access</h4>
+          <ul class="footer-links">
+            <li><a href="login.html" class="footer-link">Sign In</a></li>
+            <li><a href="register.html" class="footer-link">Create Account</a></li>
+            <li><a href="customer-dashboard.html" class="footer-link">Dashboard</a></li>
+            <li><a href="my-bookings.html" class="footer-link">My Bookings</a></li>
+            <li><a href="wishlist.html" class="footer-link">Saved Wishlist</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Platform Portals</h4>
+          <ul class="footer-links">
+            <li><a href="../provider/provider-dashboard.html" class="footer-link">Provider Dashboard</a></li>
+            <li><a href="../admin/admin-dashboard.html" class="footer-link">Admin Dashboard</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 <strong>YAADHUM OOORE</strong>. All rights reserved.
+        </div>
+        <div class="portal-links">
+          <a href="../index.html" class="portal-link">Landing Page</a>
+          <span>&bull;</span>
+          <a href="../provider/provider-dashboard.html" class="portal-link">Provider Portal</a>
+          <span>&bull;</span>
+          <a href="../admin/admin-dashboard.html" class="portal-link">Admin Portal</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Customer Module Vanilla JavaScript -->
+  <script src="js/customer.js"></script>
+
+</body>
+</html>
+
