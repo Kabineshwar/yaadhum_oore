@@ -27,6 +27,7 @@
     LOCAL_STORAGE_KEY: 'yaadhum_customer_user',
     WISHLIST_KEY: 'yaadhum_wishlist',
     COMPARE_KEY: 'yaadhum_compare',
+    BOOKINGS_KEY: 'yaadhum_demo_bookings',
     REQUEST_TIMEOUT_MS: 8000
   };
 
@@ -517,6 +518,16 @@
     // K. Setup Compare Page Handler if present
     if (document.getElementById('compareContainer')) {
       setupComparePage();
+    }
+
+    // L. Setup Booking Page Handler if present
+    if (document.getElementById('bookingContainer')) {
+      setupBookingPage();
+    }
+
+    // M. Setup My Bookings Page Handler if present
+    if (document.getElementById('myBookingsContainer')) {
+      setupMyBookingsPage();
     }
   });
 
@@ -1627,6 +1638,319 @@
   };
 
   // --------------------------------------------------------------------------
+  // 10B. Customer Booking Service (Phase 4A)
+  // --------------------------------------------------------------------------
+  const BookingService = {
+    /**
+     * Calculate price breakdown based on base package price and traveller count.
+     * Includes 5% GST calculation.
+     * @param {number} basePrice
+     * @param {number} travellerCount
+     * @returns {{ pricePerPerson: number, travellerCount: number, subtotal: number, gstRate: number, gstAmount: number, grandTotal: number }}
+     */
+    calculatePrice(basePrice, travellerCount) {
+      const count = Math.max(1, parseInt(travellerCount, 10) || 1);
+      const price = Math.max(0, parseInt(basePrice, 10) || 0);
+      const subtotal = price * count;
+      const gstRate = 0.05; // 5% GST
+      const gstAmount = Math.round(subtotal * gstRate);
+      const grandTotal = subtotal + gstAmount;
+
+      return {
+        pricePerPerson: price,
+        travellerCount: count,
+        subtotal: subtotal,
+        gstRate: gstRate,
+        gstAmount: gstAmount,
+        grandTotal: grandTotal
+      };
+    },
+
+    /**
+     * Retrieve all demo bookings from localStorage, enriched with package imagery.
+     * @returns {Array<Object>}
+     */
+    getBookings() {
+      try {
+        const raw = localStorage.getItem(CONFIG.BOOKINGS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        const list = Array.isArray(parsed) ? parsed : [];
+        return list.map(b => {
+          if (!b.packageImage && b.packageId) {
+            const pkg = PACKAGES_DATA.find(p => String(p.id) === String(b.packageId));
+            if (pkg) b.packageImage = pkg.image;
+          }
+          return b;
+        });
+      } catch (e) {
+        console.warn('Failed to parse demo bookings from localStorage:', e);
+        return [];
+      }
+    },
+
+    /**
+     * Retrieve a specific booking by internal ID or public Reference Number.
+     * @param {string|number} idOrRef
+     * @returns {Object|null}
+     */
+    getBookingById(idOrRef) {
+      if (!idOrRef) return null;
+      const list = this.getBookings();
+      const target = String(idOrRef).trim();
+      return list.find(b => String(b.id) === target || String(b.referenceNumber) === target) || null;
+    },
+
+    /**
+     * Calculate summary overview counts for customer booking KPI dashboard.
+     * @param {Array<Object>} [bookings]
+     * @returns {{ total: number, upcoming: number, completed: number, cancelled: number }}
+     */
+    getBookingStats(bookings) {
+      const list = bookings || this.getBookings();
+      const todayStr = new Date().toISOString().split('T')[0];
+      let total = list.length;
+      let upcoming = 0;
+      let completed = 0;
+      let cancelled = 0;
+
+      list.forEach(b => {
+        if (b.bookingStatus === 'Cancelled') {
+          cancelled++;
+        } else if (b.bookingStatus === 'Completed' || (b.travelDate && b.travelDate < todayStr)) {
+          completed++;
+        } else {
+          upcoming++;
+        }
+      });
+
+      return { total, upcoming, completed, cancelled };
+    },
+
+    /**
+     * Cancel an existing booking (demonstration mode fallback).
+     * @param {string|number} bookingId
+     * @param {string} [reason]
+     * @returns {Promise<{success: boolean, data?: any, error?: string, isDemo?: boolean}>}
+     */
+    async cancelBooking(bookingId, reason = '') {
+      // 1. Attempt real backend cancellation if available
+      try {
+        const response = await apiClient.post(`/customer/bookings/${bookingId}/cancel`, { reason });
+        if (response && response.success && !response.isDemo) {
+          return response;
+        }
+      } catch (err) {
+        console.info('Backend cancel endpoint offline, using demonstration cancellation engine.');
+      }
+
+      // 2. Demonstration fallback: update in localStorage
+      let rawList = [];
+      try {
+        const raw = localStorage.getItem(CONFIG.BOOKINGS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) rawList = parsed;
+        }
+      } catch (e) {
+        rawList = [];
+      }
+
+      const strId = String(bookingId);
+      const targetIndex = rawList.findIndex(b => String(b.id) === strId || String(b.referenceNumber) === strId);
+      if (targetIndex === -1) {
+        return { success: false, error: 'Booking record not found.' };
+      }
+
+      rawList[targetIndex].bookingStatus = 'Cancelled';
+      rawList[targetIndex].cancelledAt = new Date().toISOString();
+      rawList[targetIndex].cancellationReason = reason || 'Cancelled by customer (Academic Demo)';
+      rawList[targetIndex].paymentStatus = 'Cancelled (Demo)';
+
+      localStorage.setItem(CONFIG.BOOKINGS_KEY, JSON.stringify(rawList));
+
+      return {
+        success: true,
+        data: rawList[targetIndex],
+        isDemo: true
+      };
+    },
+
+    /**
+     * Seed demonstration sample bookings for initial testing and evaluation.
+     * @returns {Array<Object>}
+     */
+    seedSampleBookings() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      
+      const upDate = new Date(today);
+      upDate.setDate(upDate.getDate() + 10);
+      const upDateStr = upDate.toISOString().split('T')[0];
+
+      const pastDate = new Date(today);
+      pastDate.setDate(pastDate.getDate() - 30);
+      const pastDateStr = pastDate.toISOString().split('T')[0];
+
+      const cancelDate = new Date(today);
+      cancelDate.setDate(cancelDate.getDate() + 25);
+      const cancelDateStr = cancelDate.toISOString().split('T')[0];
+
+      const samples = [
+        {
+          id: 'BK-1001',
+          referenceNumber: `YO-${yyyy}-748291`,
+          packageId: 1,
+          packageTitle: 'Ooty & Nilgiri Heritage Circuit',
+          destination: 'Ooty',
+          packageImage: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80',
+          travelDate: upDateStr,
+          travellerCount: 2,
+          pricePerPerson: 8500,
+          subtotal: 17000,
+          gstAmount: 850,
+          grandTotal: 17850,
+          customerName: 'Anandha Kannan',
+          customerEmail: 'anandha@example.com',
+          customerPhone: '9840123456',
+          specialRequests: 'Vegetarian meals preferred for all departures.',
+          paymentMethod: 'UPI',
+          paymentStatus: 'Paid (Simulated)',
+          bookingStatus: 'Confirmed',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'BK-1002',
+          referenceNumber: `YO-${yyyy}-512849`,
+          packageId: 5,
+          packageTitle: 'Madurai Temple & Food Trail',
+          destination: 'Madurai',
+          packageImage: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
+          travelDate: pastDateStr,
+          travellerCount: 1,
+          pricePerPerson: 4200,
+          subtotal: 4200,
+          gstAmount: 210,
+          grandTotal: 4410,
+          customerName: 'Anandha Kannan',
+          customerEmail: 'anandha@example.com',
+          customerPhone: '9840123456',
+          specialRequests: 'Temple darshan pass requested.',
+          paymentMethod: 'NetBanking',
+          paymentStatus: 'Paid (Simulated)',
+          bookingStatus: 'Completed',
+          createdAt: new Date(Date.now() - 35 * 86400000).toISOString()
+        },
+        {
+          id: 'BK-1003',
+          referenceNumber: `YO-${yyyy}-938102`,
+          packageId: 2,
+          packageTitle: 'Kodaikanal Mist & Lake Retreat',
+          destination: 'Kodaikanal',
+          packageImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+          travelDate: cancelDateStr,
+          travellerCount: 3,
+          pricePerPerson: 9200,
+          subtotal: 27600,
+          gstAmount: 1380,
+          grandTotal: 28980,
+          customerName: 'Anandha Kannan',
+          customerEmail: 'anandha@example.com',
+          customerPhone: '9840123456',
+          specialRequests: 'Family cottage with lake view requested.',
+          paymentMethod: 'Card',
+          paymentStatus: 'Cancelled (Demo)',
+          bookingStatus: 'Cancelled',
+          cancelledAt: new Date().toISOString(),
+          cancellationReason: 'Scheduling conflict (Academic Demo)',
+          createdAt: new Date(Date.now() - 2 * 86400000).toISOString()
+        }
+      ];
+
+      localStorage.setItem(CONFIG.BOOKINGS_KEY, JSON.stringify(samples));
+      return samples;
+    },
+
+    /**
+     * Save a booking to localStorage demo store.
+     * @param {Object} bookingData
+     * @returns {Object} savedBooking
+     */
+    saveBooking(bookingData) {
+      try {
+        const bookings = this.getBookings();
+        bookings.unshift(bookingData); // Newest first
+        localStorage.setItem(CONFIG.BOOKINGS_KEY, JSON.stringify(bookings));
+        return bookingData;
+      } catch (e) {
+        console.warn('Failed to save booking to localStorage:', e);
+        return bookingData;
+      }
+    },
+
+    /**
+     * Generate a unique demonstration booking reference code.
+     * Format: YO-YYYY-XXXXXX (e.g. YO-2026-482910)
+     */
+    generateReference() {
+      const year = new Date().getFullYear();
+      const rand = Math.floor(100000 + Math.random() * 900000);
+      return `YO-${year}-${rand}`;
+    },
+
+    /**
+     * Create a booking either via backend API or fallback to demonstration mode.
+     * @param {Object} bookingPayload
+     * @returns {Promise<{success: boolean, data?: any, error?: string, isDemo?: boolean}>}
+     */
+    async createBooking(bookingPayload) {
+      // Attempt real backend POST if available
+      try {
+        const response = await apiClient.post('/customer/bookings', bookingPayload);
+        if (response && response.success && !response.isDemo) {
+          this.saveBooking(response.data);
+          return response;
+        }
+      } catch (err) {
+        console.info('Backend booking endpoint offline, utilizing demonstration booking engine.');
+      }
+
+      // Demonstration fallback mode
+      const bookingRef = this.generateReference();
+      const newBooking = {
+        id: 'BK-' + Date.now(),
+        referenceNumber: bookingRef,
+        packageId: bookingPayload.packageId,
+        packageTitle: bookingPayload.packageTitle,
+        destination: bookingPayload.destination,
+        packageImage: bookingPayload.packageImage || '',
+        travelDate: bookingPayload.travelDate,
+        travellerCount: bookingPayload.travellerCount,
+        pricePerPerson: bookingPayload.pricePerPerson,
+        subtotal: bookingPayload.subtotal,
+        gstAmount: bookingPayload.gstAmount,
+        grandTotal: bookingPayload.grandTotal,
+        customerName: bookingPayload.customerName,
+        customerEmail: bookingPayload.customerEmail,
+        customerPhone: bookingPayload.customerPhone,
+        specialRequests: bookingPayload.specialRequests || '',
+        paymentMethod: bookingPayload.paymentMethod || 'UPI',
+        paymentStatus: bookingPayload.paymentMethod === 'Arrival' ? 'Pending (Pay on Arrival)' : 'Paid (Simulated)',
+        bookingStatus: 'Confirmed',
+        createdAt: new Date().toISOString()
+      };
+
+      this.saveBooking(newBooking);
+
+      return {
+        success: true,
+        data: newBooking,
+        isDemo: true
+      };
+    }
+  };
+
+  // --------------------------------------------------------------------------
   // 11. Page Setup Handlers for Destinations, Packages & Search
   // --------------------------------------------------------------------------
 
@@ -2342,6 +2666,1317 @@
     });
   }
 
+  /**
+   * Setup logic for booking.html (Phase 4A: Customer Booking Module).
+   */
+  async function setupBookingPage() {
+    const container = document.getElementById('bookingContainer');
+    if (!container) return;
+
+    // 1. Get package ID from URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const pkgId = urlParams.get('id');
+
+    if (!pkgId) {
+      container.innerHTML = `
+        <div style="padding: 60px 0;">
+          <div class="container">
+            <div class="empty-state">
+              <div class="empty-state-icon">&#128507;</div>
+              <h2 class="empty-state-title">No Package Selected for Booking</h2>
+              <p class="empty-state-desc">
+                Please select a tourism package from our catalogue to proceed with booking your authentic Tamil Nadu experience.
+              </p>
+              <a href="packages.html" class="btn btn-primary btn-lg">Browse Tourism Packages &rarr;</a>
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // 2. Fetch package details
+    const pkg = await PackageService.getById(pkgId);
+    if (!pkg) {
+      container.innerHTML = `
+        <div style="padding: 60px 0;">
+          <div class="container">
+            <div class="empty-state">
+              <div class="empty-state-icon">&#9888;</div>
+              <h2 class="empty-state-title">Package Not Found</h2>
+              <p class="empty-state-desc">
+                We could not locate package #${pkgId}. It may have been updated or removed.
+              </p>
+              <div class="d-flex justify-center gap-md" style="margin-top: 16px;">
+                <a href="packages.html" class="btn btn-primary">Browse Packages &rarr;</a>
+                <a href="../index.html" class="btn btn-secondary">Homepage</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // 3. User session check for pre-filling
+    const currentUser = CustomerAuth.getCurrentUser();
+    const defaultName = currentUser ? currentUser.name || '' : '';
+    const defaultEmail = currentUser ? currentUser.email || '' : '';
+    const defaultPhone = currentUser ? currentUser.phone || '' : '';
+
+    // Date constraints: minimum date tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDateStr = tomorrow.toISOString().split('T')[0];
+
+    // Initial state
+    let travellerCount = 1;
+    const maxCapacity = Math.max(1, pkg.availableSeats || 15);
+    const initialCalc = BookingService.calculatePrice(pkg.price, travellerCount);
+
+    // Render initial booking layout
+    container.innerHTML = `
+      <div style="padding: 30px 0 60px 0;">
+        <div class="container">
+          
+          <!-- Breadcrumb -->
+          <nav class="breadcrumb-trail" aria-label="Breadcrumb" style="margin-bottom: var(--space-lg);">
+            <a href="../index.html">Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="packages.html">Packages</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="package-details.html?id=${pkg.id}">${pkg.title}</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Confirm Booking</span>
+          </nav>
+
+          <div class="section-header" style="margin-bottom: var(--space-xl); text-align: left;">
+            <span class="section-tag">Direct Package Reservation</span>
+            <h1 style="font-size: 2rem; color: var(--color-primary-dark); margin: 6px 0;">
+              Book Your Experience: ${pkg.title}
+            </h1>
+            <p style="color: var(--color-text-muted); margin: 0;">
+              Departing to <strong>${pkg.destination}</strong> &bull; ${pkg.duration} &bull; Handcrafted Authentic Itinerary
+            </p>
+          </div>
+
+          <div class="booking-layout">
+            
+            <!-- Left Column: Booking Form Steps -->
+            <div class="booking-form-col">
+              <form id="bookingForm" novalidate>
+                
+                <!-- Step 1: Trip & Travellers -->
+                <div class="booking-step-card">
+                  <div class="booking-step-header">
+                    <span class="step-num-badge">1</span>
+                    <h2 class="booking-step-title">Select Departure Date & Travellers</h2>
+                  </div>
+
+                  <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                    
+                    <!-- Departure Date -->
+                    <div class="form-group">
+                      <label for="travelDate" class="form-label">
+                        Departure Date <span style="color: var(--color-status-cancelled);">*</span>
+                      </label>
+                      <input 
+                        type="date" 
+                        id="travelDate" 
+                        name="travelDate" 
+                        class="form-control" 
+                        min="${minDateStr}" 
+                        value="${minDateStr}" 
+                        required
+                      >
+                      <span class="form-hint">Bookings must be scheduled at least 24 hours in advance.</span>
+                      <div class="field-error-msg" id="travelDateError" style="display:none; color:var(--color-status-cancelled); font-size:0.8rem; margin-top:4px;"></div>
+                    </div>
+
+                    <!-- Traveller Count -->
+                    <div class="form-group">
+                      <label class="form-label">
+                        Number of Travellers <span style="color: var(--color-status-cancelled);">*</span>
+                      </label>
+                      <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                        <div class="traveller-counter">
+                          <button type="button" class="counter-btn" id="btnTravellerMinus" aria-label="Decrease travellers" disabled>&minus;</button>
+                          <span class="counter-value-display" id="travellerCountDisplay">1</span>
+                          <button type="button" class="counter-btn" id="btnTravellerPlus" aria-label="Increase travellers" ${maxCapacity <= 1 ? 'disabled' : ''}>&plus;</button>
+                        </div>
+                        <input type="hidden" id="travellerCount" name="travellerCount" value="1">
+                        <span style="font-size: 0.85rem; color: var(--color-text-muted);">
+                          &#128101; <strong id="seatsLeftDisplay">${maxCapacity}</strong> seats available
+                        </span>
+                      </div>
+                      <div class="field-error-msg" id="travellerCountError" style="display:none; color:var(--color-status-cancelled); font-size:0.8rem; margin-top:4px;"></div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- Step 2: Contact / Traveller Details -->
+                <div class="booking-step-card">
+                  <div class="booking-step-header">
+                    <span class="step-num-badge">2</span>
+                    <h2 class="booking-step-title">Lead Traveller & Contact Details</h2>
+                  </div>
+
+                  ${currentUser ? `
+                    <div style="background: var(--color-primary-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: var(--space-md); font-size: 0.88rem; color: var(--color-primary-dark); display: flex; align-items: center; gap: 8px;">
+                      <span>&#128100; Signed in as <strong>${currentUser.name}</strong> (${currentUser.email})</span>
+                    </div>
+                  ` : `
+                    <div style="background: var(--color-gold-subtle); border: 1px solid var(--color-gold); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: var(--space-md); font-size: 0.85rem; color: var(--color-text-main); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                      <span>Already a YAADHUM OOORE member? Log in for express checkout.</span>
+                      <a href="login.html" class="btn btn-secondary btn-sm" style="background:#FFF;">Member Login</a>
+                    </div>
+                  `}
+
+                  <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                    
+                    <div class="form-group" style="grid-column: span 2;">
+                      <label for="customerName" class="form-label">
+                        Full Name (Lead Traveller) <span style="color: var(--color-status-cancelled);">*</span>
+                      </label>
+                      <input 
+                        type="text" 
+                        id="customerName" 
+                        name="customerName" 
+                        class="form-control" 
+                        placeholder="e.g. Anandha Kannan" 
+                        value="${defaultName}" 
+                        required
+                      >
+                      <div class="field-error-msg" id="customerNameError" style="display:none; color:var(--color-status-cancelled); font-size:0.8rem; margin-top:4px;"></div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="customerEmail" class="form-label">
+                        Email Address <span style="color: var(--color-status-cancelled);">*</span>
+                      </label>
+                      <input 
+                        type="email" 
+                        id="customerEmail" 
+                        name="customerEmail" 
+                        class="form-control" 
+                        placeholder="name@example.com" 
+                        value="${defaultEmail}" 
+                        required
+                      >
+                      <span class="form-hint">Confirmation receipt will be delivered here.</span>
+                      <div class="field-error-msg" id="customerEmailError" style="display:none; color:var(--color-status-cancelled); font-size:0.8rem; margin-top:4px;"></div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="customerPhone" class="form-label">
+                        Mobile Phone Number <span style="color: var(--color-status-cancelled);">*</span>
+                      </label>
+                      <input 
+                        type="tel" 
+                        id="customerPhone" 
+                        name="customerPhone" 
+                        class="form-control" 
+                        placeholder="10-digit Indian mobile (e.g. 9876543210)" 
+                        value="${defaultPhone}" 
+                        maxlength="10" 
+                        required
+                      >
+                      <span class="form-hint">Provider will contact you on tour departure morning.</span>
+                      <div class="field-error-msg" id="customerPhoneError" style="display:none; color:var(--color-status-cancelled); font-size:0.8rem; margin-top:4px;"></div>
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                      <label for="specialRequests" class="form-label">
+                        Special Requests & Preferences <span style="font-weight: normal; color: var(--color-text-light);">(Optional)</span>
+                      </label>
+                      <textarea 
+                        id="specialRequests" 
+                        name="specialRequests" 
+                        class="form-control" 
+                        rows="2" 
+                        placeholder="Dietary preferences (e.g. Pure Jain / Veg), accessibility requirements, pickup points, etc."
+                      ></textarea>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- Step 3: Simulated Payment Mode -->
+                <div class="booking-step-card">
+                  <div class="booking-step-header">
+                    <span class="step-num-badge">3</span>
+                    <h2 class="booking-step-title">Choose Payment Method</h2>
+                  </div>
+
+                  <div style="background: var(--color-gold-subtle); border-left: 4px solid var(--color-gold); border-radius: var(--radius-xs); padding: 12px 16px; margin-bottom: var(--space-md); font-size: 0.85rem; color: var(--color-text-main); line-height: 1.5;">
+                    <strong>Academic Demonstration Simulation:</strong> YAADHUM OOORE is a web technology project. No actual monetary transaction or card charge will take place. Select your preferred simulated payment mode below.
+                  </div>
+
+                  <div class="payment-methods-grid">
+                    
+                    <label class="payment-card-label">
+                      <input type="radio" name="paymentMethod" value="UPI" checked>
+                      <div class="payment-card">
+                        <div class="payment-card-title">
+                          <span>&#128241; UPI / QR Code</span>
+                        </div>
+                        <p class="payment-card-desc">Google Pay, PhonePe, Paytm, BHIM</p>
+                      </div>
+                    </label>
+
+                    <label class="payment-card-label">
+                      <input type="radio" name="paymentMethod" value="Card">
+                      <div class="payment-card">
+                        <div class="payment-card-title">
+                          <span>&#128179; Credit / Debit Card</span>
+                        </div>
+                        <p class="payment-card-desc">Visa, MasterCard, RuPay, Maestro</p>
+                      </div>
+                    </label>
+
+                    <label class="payment-card-label">
+                      <input type="radio" name="paymentMethod" value="NetBanking">
+                      <div class="payment-card">
+                        <div class="payment-card-title">
+                          <span>&#127963; Net Banking</span>
+                        </div>
+                        <p class="payment-card-desc">SBI, HDFC, ICICI, Canara, Indian Bank</p>
+                      </div>
+                    </label>
+
+                    <label class="payment-card-label">
+                      <input type="radio" name="paymentMethod" value="Arrival">
+                      <div class="payment-card">
+                        <div class="payment-card-title">
+                          <span>&#128181; Pay on Arrival</span>
+                        </div>
+                        <p class="payment-card-desc">Pay at tour check-in via cash or UPI</p>
+                      </div>
+                    </label>
+
+                  </div>
+                </div>
+
+                <!-- Step 4: Terms & Confirmation -->
+                <div class="booking-step-card">
+                  <div class="booking-step-header">
+                    <span class="step-num-badge">4</span>
+                    <h2 class="booking-step-title">Review & Confirm</h2>
+                  </div>
+
+                  <div class="form-group" style="margin-bottom: var(--space-lg);">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 0.88rem; line-height: 1.5; color: var(--color-text-main);">
+                      <input type="checkbox" id="agreeTerms" name="agreeTerms" style="margin-top: 3px;" required>
+                      <span>
+                        I accept the <a href="#" onclick="event.preventDefault(); alert('YAADHUM OOORE Academic Terms: Free cancellation up to 48 hours before departure. Respect local eco-tourism norms.');" style="color: var(--color-primary); text-decoration: underline;">Terms & Conditions</a>, Cancellation Policy, and agree to follow responsible eco-tourism guidelines across Tamil Nadu.
+                      </span>
+                    </label>
+                    <div class="field-error-msg" id="agreeTermsError" style="display:none; color:var(--color-status-cancelled); font-size:0.8rem; margin-top:4px;"></div>
+                  </div>
+
+                  <div id="bookingAlertBox" style="display: none; margin-bottom: var(--space-md);"></div>
+
+                  <button type="submit" id="submitBookingBtn" class="btn btn-terracotta btn-lg" style="width: 100%; font-size: 1.1rem; padding: 14px;">
+                    Confirm & Complete Booking &rarr;
+                  </button>
+                  <p style="text-align: center; font-size: 0.8rem; color: var(--color-text-light); margin-top: 8px;">
+                    Instant confirmation &bull; Verified Local Experience
+                  </p>
+                </div>
+
+              </form>
+            </div>
+
+            <!-- Right Column: Sticky Order Summary -->
+            <div class="booking-summary-col">
+              <div class="order-summary-card">
+                <h3 style="font-size: 1.2rem; color: var(--color-primary-dark); margin-bottom: var(--space-md); font-weight: 800;">
+                  Booking Summary
+                </h3>
+
+                <!-- Package Thumbnail Preview -->
+                <div class="order-pkg-preview">
+                  <img src="${pkg.image}" alt="${pkg.title}" class="order-pkg-thumb" onerror="this.src='https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80'">
+                  <div>
+                    <h4 class="order-pkg-title">${pkg.title}</h4>
+                    <div class="order-pkg-meta">&#128205; ${pkg.destination}</div>
+                    <div class="order-pkg-meta">&#128197; ${pkg.duration}</div>
+                  </div>
+                </div>
+
+                <!-- Price Calculations -->
+                <div style="margin-bottom: var(--space-md);">
+                  <div class="price-breakdown-row">
+                    <span>Departure Date</span>
+                    <strong id="summaryDepartureDate">${minDateStr}</strong>
+                  </div>
+                  <div class="price-breakdown-row">
+                    <span>Base Price (per person)</span>
+                    <span>&#8377;${pkg.price.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div class="price-breakdown-row">
+                    <span>Travellers</span>
+                    <span id="summaryTravellerCount">1 Person</span>
+                  </div>
+                  <div class="price-breakdown-row">
+                    <span>Subtotal</span>
+                    <span id="summarySubtotal">&#8377;${initialCalc.subtotal.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div class="price-breakdown-row">
+                    <span>GST (5%)</span>
+                    <span id="summaryGst">&#8377;${initialCalc.gstAmount.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div class="price-breakdown-row total-row">
+                    <span>Grand Total</span>
+                    <span id="summaryGrandTotal" style="color: var(--color-primary);">&#8377;${initialCalc.grandTotal.toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+
+                <!-- Guarantee & Inclusions Preview -->
+                <div style="background: var(--color-bg-warm); border-radius: var(--radius-sm); padding: 12px; font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.4;">
+                  <div style="font-weight: 700; color: var(--color-primary-dark); margin-bottom: 4px;">&#10003; What's Included:</div>
+                  <ul style="padding-left: 16px; margin: 0;">
+                    ${(pkg.inclusions || ['Accommodation', 'Guided Tours', 'Local Transfers']).slice(0, 3).map(inc => `<li>${inc}</li>`).join('')}
+                  </ul>
+                  <div style="margin-top: 8px; font-size: 0.78rem; color: var(--color-text-light);">
+                    Free cancellation up to 48 hours before departure.
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    // 4. Wire Interactive Controls
+    const form = document.getElementById('bookingForm');
+    const btnMinus = document.getElementById('btnTravellerMinus');
+    const btnPlus = document.getElementById('btnTravellerPlus');
+    const travellerDisplay = document.getElementById('travellerCountDisplay');
+    const travellerHidden = document.getElementById('travellerCount');
+    const travelDateInput = document.getElementById('travelDate');
+    const customerNameInput = document.getElementById('customerName');
+    const customerEmailInput = document.getElementById('customerEmail');
+    const customerPhoneInput = document.getElementById('customerPhone');
+    const agreeTermsCheckbox = document.getElementById('agreeTerms');
+    const submitBtn = document.getElementById('submitBookingBtn');
+    const alertBox = document.getElementById('bookingAlertBox');
+
+    // Summary Elements
+    const summaryDepartureDate = document.getElementById('summaryDepartureDate');
+    const summaryTravellerCount = document.getElementById('summaryTravellerCount');
+    const summarySubtotal = document.getElementById('summarySubtotal');
+    const summaryGst = document.getElementById('summaryGst');
+    const summaryGrandTotal = document.getElementById('summaryGrandTotal');
+
+    function updatePricing() {
+      const calc = BookingService.calculatePrice(pkg.price, travellerCount);
+      if (travellerDisplay) travellerDisplay.textContent = travellerCount;
+      if (travellerHidden) travellerHidden.value = travellerCount;
+      if (summaryTravellerCount) summaryTravellerCount.textContent = `${travellerCount} Person${travellerCount > 1 ? 's' : ''}`;
+      if (summarySubtotal) summarySubtotal.innerHTML = `&#8377;${calc.subtotal.toLocaleString('en-IN')}`;
+      if (summaryGst) summaryGst.innerHTML = `&#8377;${calc.gstAmount.toLocaleString('en-IN')}`;
+      if (summaryGrandTotal) summaryGrandTotal.innerHTML = `&#8377;${calc.grandTotal.toLocaleString('en-IN')}`;
+
+      if (btnMinus) btnMinus.disabled = travellerCount <= 1;
+      if (btnPlus) btnPlus.disabled = travellerCount >= maxCapacity;
+    }
+
+    if (btnMinus) {
+      btnMinus.addEventListener('click', function () {
+        if (travellerCount > 1) {
+          travellerCount--;
+          updatePricing();
+        }
+      });
+    }
+
+    if (btnPlus) {
+      btnPlus.addEventListener('click', function () {
+        if (travellerCount < maxCapacity) {
+          travellerCount++;
+          updatePricing();
+        }
+      });
+    }
+
+    if (travelDateInput) {
+      travelDateInput.addEventListener('change', function () {
+        const val = this.value;
+        if (summaryDepartureDate) summaryDepartureDate.textContent = val || 'Not Selected';
+        const errEl = document.getElementById('travelDateError');
+        if (errEl) errEl.style.display = 'none';
+      });
+    }
+
+    // Clear inline errors on input
+    function setupErrorClear(inputEl, errorId) {
+      if (!inputEl) return;
+      inputEl.addEventListener('input', function () {
+        const err = document.getElementById(errorId);
+        if (err) err.style.display = 'none';
+        if (alertBox) alertBox.style.display = 'none';
+      });
+    }
+
+    setupErrorClear(customerNameInput, 'customerNameError');
+    setupErrorClear(customerEmailInput, 'customerEmailError');
+    setupErrorClear(customerPhoneInput, 'customerPhoneError');
+    if (agreeTermsCheckbox) {
+      agreeTermsCheckbox.addEventListener('change', function () {
+        const err = document.getElementById('agreeTermsError');
+        if (err) err.style.display = 'none';
+      });
+    }
+
+    // 5. Handle Form Submission
+    if (form) {
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // Field Validations
+        let hasError = false;
+
+        function showError(fieldId, errorId, message) {
+          const field = document.getElementById(fieldId);
+          const errEl = document.getElementById(errorId);
+          if (errEl) {
+            errEl.textContent = message;
+            errEl.style.display = 'block';
+          }
+          if (field && !hasError) {
+            field.focus();
+          }
+          hasError = true;
+        }
+
+        // Date Check
+        const selectedDate = travelDateInput ? travelDateInput.value : '';
+        if (!selectedDate) {
+          showError('travelDate', 'travelDateError', 'Please select a departure date.');
+        } else if (selectedDate < minDateStr) {
+          showError('travelDate', 'travelDateError', 'Departure date must be at least 24 hours in the future.');
+        }
+
+        // Name Check
+        const nameVal = customerNameInput ? customerNameInput.value.trim() : '';
+        if (!nameVal || nameVal.length < 2) {
+          showError('customerName', 'customerNameError', 'Please enter the lead traveller’s full name.');
+        }
+
+        // Email Check
+        const emailVal = customerEmailInput ? customerEmailInput.value.trim() : '';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailVal || !emailRegex.test(emailVal)) {
+          showError('customerEmail', 'customerEmailError', 'Please enter a valid email address.');
+        }
+
+        // Phone Check
+        const phoneVal = customerPhoneInput ? customerPhoneInput.value.trim() : '';
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneVal || !phoneRegex.test(phoneVal)) {
+          showError('customerPhone', 'customerPhoneError', 'Please enter a valid 10-digit Indian mobile number (e.g. 9876543210).');
+        }
+
+        // Terms Check
+        if (agreeTermsCheckbox && !agreeTermsCheckbox.checked) {
+          showError('agreeTerms', 'agreeTermsError', 'You must agree to the Terms & Conditions and Eco-tourism Guidelines.');
+        }
+
+        if (hasError) return;
+
+        // Submit state
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing Reservation...';
+
+        const selectedPayment = form.querySelector('input[name="paymentMethod"]:checked');
+        const paymentMethod = selectedPayment ? selectedPayment.value : 'UPI';
+        const calc = BookingService.calculatePrice(pkg.price, travellerCount);
+        const specialReqs = document.getElementById('specialRequests') ? document.getElementById('specialRequests').value.trim() : '';
+
+        const payload = {
+          packageId: pkg.id,
+          packageTitle: pkg.title,
+          destination: pkg.destination,
+          packageImage: pkg.image,
+          travelDate: selectedDate,
+          travellerCount: travellerCount,
+          pricePerPerson: calc.pricePerPerson,
+          subtotal: calc.subtotal,
+          gstAmount: calc.gstAmount,
+          grandTotal: calc.grandTotal,
+          customerName: nameVal,
+          customerEmail: emailVal,
+          customerPhone: phoneVal,
+          specialRequests: specialReqs,
+          paymentMethod: paymentMethod
+        };
+
+        const result = await BookingService.createBooking(payload);
+
+        if (result && result.success && result.data) {
+          const booking = result.data;
+          
+          if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+
+          container.innerHTML = `
+            <div style="padding: 60px 0;">
+              <div class="container">
+                <div class="booking-success-box">
+                  <div class="success-icon-large">&#10003;</div>
+                  <h1 style="color: var(--color-primary-dark); font-size: 1.85rem; margin-bottom: 6px;">
+                    Booking Confirmed!
+                  </h1>
+                  <p style="font-size: 1rem; color: var(--color-text-muted); margin-bottom: var(--space-md);">
+                    முன்பதிவு உறுதி செய்யப்பட்டது &bull; Your local tourism experience is secured.
+                  </p>
+
+                  <div class="booking-ref-banner">
+                    <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-text-light); letter-spacing: 0.5px; margin-bottom: 2px;">
+                      Booking Reference Number
+                    </div>
+                    <span class="booking-ref-num">${booking.referenceNumber}</span>
+                  </div>
+
+                  <p style="color: var(--color-text-main); font-size: 0.95rem; line-height: 1.5; max-width: 580px; margin: 0 auto var(--space-lg) auto;">
+                    Thank you, <strong>${booking.customerName}</strong>! A reservation voucher and tour schedule has been logged for your trip. Please keep this reference number for check-in.
+                  </p>
+
+                  <table class="booking-summary-table">
+                    <tbody>
+                      <tr>
+                        <td style="color: var(--color-text-muted); width: 38%;">Package</td>
+                        <td><strong>${booking.packageTitle}</strong></td>
+                      </tr>
+                      <tr>
+                        <td style="color: var(--color-text-muted);">Destination</td>
+                        <td>${booking.destination}</td>
+                      </tr>
+                      <tr>
+                        <td style="color: var(--color-text-muted);">Departure Date</td>
+                        <td><strong>${booking.travelDate}</strong></td>
+                      </tr>
+                      <tr>
+                        <td style="color: var(--color-text-muted);">Travellers</td>
+                        <td>${booking.travellerCount} Person(s)</td>
+                      </tr>
+                      <tr>
+                        <td style="color: var(--color-text-muted);">Total Amount</td>
+                        <td style="font-size: 1.15rem; font-weight: 800; color: var(--color-primary-dark);">
+                          &#8377;${booking.grandTotal.toLocaleString('en-IN')} 
+                          <span style="font-size: 0.75rem; font-weight: normal; color: var(--color-text-light);">(incl. 5% GST)</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="color: var(--color-text-muted);">Payment Mode & Status</td>
+                        <td>
+                          <span class="badge ${booking.paymentMethod === 'Arrival' ? 'badge-warning' : 'badge-success'}">
+                            ${booking.paymentMethod} &bull; ${booking.paymentStatus}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="color: var(--color-text-muted);">Lead Contact</td>
+                        <td>${booking.customerName} (${booking.customerEmail}, +91 ${booking.customerPhone})</td>
+                      </tr>
+                      ${booking.specialRequests ? `
+                        <tr>
+                          <td style="color: var(--color-text-muted);">Special Requests</td>
+                          <td>${booking.specialRequests}</td>
+                        </tr>
+                      ` : ''}
+                    </tbody>
+                  </table>
+
+                  <div class="d-flex justify-center gap-md" style="flex-wrap: wrap; margin-top: var(--space-xl);">
+                    <a href="packages.html" class="btn btn-primary btn-md">
+                      Browse More Packages &rarr;
+                    </a>
+                    <a href="../index.html" class="btn btn-secondary btn-md">
+                      Return to Homepage
+                    </a>
+                    <a href="my-bookings.html" class="btn btn-terracotta btn-md">
+                      View My Bookings
+                    </a>
+                  </div>
+
+                  <div style="margin-top: var(--space-xl); font-size: 0.8rem; color: var(--color-text-light);">
+                    Need to make adjustments? Reach customer support at <strong>support@yaadhumoore.local</strong> with your reference code.
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Confirm & Complete Booking \u2192';
+          if (alertBox) {
+            alertBox.className = 'alert alert-error';
+            alertBox.textContent = (result && result.error) || 'Could not complete your reservation. Please try again.';
+            alertBox.style.display = 'block';
+          }
+        }
+      });
+    }
+  }
+
+  /**
+   * Setup logic for my-bookings.html (Phase 4B: Customer Booking Management).
+   */
+  async function setupMyBookingsPage() {
+    const container = document.getElementById('myBookingsContainer');
+    if (!container) return;
+
+    // Load initial bookings from demo storage (or backend in production)
+    let bookings = BookingService.getBookings();
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let currentSort = 'booking-desc';
+
+    // Base Page Structure
+    container.innerHTML = `
+      <div style="padding: 30px 0 60px 0;">
+        <div class="container">
+          
+          <!-- Breadcrumb -->
+          <nav class="breadcrumb-trail" aria-label="Breadcrumb" style="margin-bottom: var(--space-lg);">
+            <a href="../index.html">Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">My Bookings</span>
+          </nav>
+
+          <!-- Notification Toast Box -->
+          <div id="bookingToastBox" style="display: none; margin-bottom: var(--space-md);" role="alert"></div>
+
+          <!-- Page Header -->
+          <div class="bookings-dashboard-header d-flex justify-between align-center" style="flex-wrap: wrap; gap: 16px;">
+            <div>
+              <span class="section-tag">Reservation Hub</span>
+              <h1 style="font-size: 2rem; color: var(--color-primary-dark); margin: 6px 0;">
+                My Tour Bookings
+              </h1>
+              <p style="color: var(--color-text-muted); margin: 0;">
+                முன்பதிவு மேலாண்மை &bull; Manage your travel reservations, view tour itineraries, and track departure dates.
+              </p>
+            </div>
+            <div>
+              <a href="packages.html" class="btn btn-primary btn-md">
+                + Explore More Packages
+              </a>
+            </div>
+          </div>
+
+          <!-- KPI Summary Grid -->
+          <div class="bookings-kpi-grid" id="bookingsKpiGrid"></div>
+
+          <!-- Toolbar: Search, Filter Tabs, Sort -->
+          <div class="bookings-toolbar">
+            <div class="bookings-search-box">
+              <span class="bookings-search-icon">&#128269;</span>
+              <input 
+                type="text" 
+                id="bookingsSearchInput" 
+                class="bookings-search-input" 
+                placeholder="Search by booking reference or package name..."
+                aria-label="Search bookings by reference or package"
+              >
+            </div>
+
+            <div class="bookings-filter-tabs" id="bookingsFilterTabs" role="tablist">
+              <button type="button" class="booking-filter-tab active" data-filter="all" role="tab">All Bookings</button>
+              <button type="button" class="booking-filter-tab" data-filter="upcoming" role="tab">Upcoming</button>
+              <button type="button" class="booking-filter-tab" data-filter="completed" role="tab">Completed</button>
+              <button type="button" class="booking-filter-tab" data-filter="cancelled" role="tab">Cancelled</button>
+            </div>
+
+            <div class="bookings-sort-wrap">
+              <label for="bookingsSortSelect" style="font-size: 0.85rem; color: var(--color-text-muted); font-weight: 600;">Sort By:</label>
+              <select id="bookingsSortSelect" class="bookings-sort-select" aria-label="Sort bookings">
+                <option value="booking-desc">Newest Booking</option>
+                <option value="booking-asc">Oldest Booking</option>
+                <option value="date-asc">Departure: Earliest First</option>
+                <option value="date-desc">Departure: Latest First</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Bookings List Output -->
+          <div id="bookingsList" class="my-bookings-list"></div>
+
+        </div>
+      </div>
+
+      <!-- Modal Dialog Overlay for Details & Cancellation -->
+      <div id="bookingModalOverlay" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="booking-modal-dialog" id="bookingModalDialog"></div>
+      </div>
+    `;
+
+    const kpiGrid = document.getElementById('bookingsKpiGrid');
+    const bookingsList = document.getElementById('bookingsList');
+    const searchInput = document.getElementById('bookingsSearchInput');
+    const sortSelect = document.getElementById('bookingsSortSelect');
+    const filterTabs = document.querySelectorAll('.booking-filter-tab');
+    const modalOverlay = document.getElementById('bookingModalOverlay');
+    const modalDialog = document.getElementById('bookingModalDialog');
+    const toastBox = document.getElementById('bookingToastBox');
+
+    // 1. Toast Notification Helper
+    function showToast(message, type = 'success') {
+      if (!toastBox) return;
+      toastBox.className = type === 'success' ? 'alert alert-success' : 'alert alert-error';
+      toastBox.innerHTML = `<span>${message}</span>`;
+      toastBox.style.display = 'block';
+      if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      setTimeout(() => {
+        if (toastBox) toastBox.style.display = 'none';
+      }, 6000);
+    }
+
+    // 2. Render KPI Summary Cards
+    function renderKpiCards() {
+      if (!kpiGrid) return;
+      const stats = BookingService.getBookingStats(bookings);
+
+      kpiGrid.innerHTML = `
+        <div class="kpi-card kpi-total">
+          <div class="kpi-info">
+            <span class="kpi-value">${stats.total}</span>
+            <span class="kpi-label">Total Bookings</span>
+          </div>
+          <div class="kpi-icon">&#128197;</div>
+        </div>
+
+        <div class="kpi-card kpi-upcoming">
+          <div class="kpi-info">
+            <span class="kpi-value">${stats.upcoming}</span>
+            <span class="kpi-label">Upcoming Tours</span>
+          </div>
+          <div class="kpi-icon">&#9992;</div>
+        </div>
+
+        <div class="kpi-card kpi-completed">
+          <div class="kpi-info">
+            <span class="kpi-value">${stats.completed}</span>
+            <span class="kpi-label">Completed Tours</span>
+          </div>
+          <div class="kpi-icon">&#10003;</div>
+        </div>
+
+        <div class="kpi-card kpi-cancelled">
+          <div class="kpi-info">
+            <span class="kpi-value">${stats.cancelled}</span>
+            <span class="kpi-label">Cancelled Bookings</span>
+          </div>
+          <div class="kpi-icon">&#10005;</div>
+        </div>
+      `;
+    }
+
+    // 3. Filter & Sort Bookings
+    function getFilteredBookings() {
+      const todayStr = new Date().toISOString().split('T')[0];
+      let filtered = [...bookings];
+
+      // Filter by status tab
+      if (currentFilter === 'upcoming') {
+        filtered = filtered.filter(b => b.bookingStatus !== 'Cancelled' && (b.bookingStatus === 'Upcoming' || (b.bookingStatus === 'Confirmed' && (!b.travelDate || b.travelDate >= todayStr))));
+      } else if (currentFilter === 'completed') {
+        filtered = filtered.filter(b => b.bookingStatus === 'Completed' || (b.bookingStatus === 'Confirmed' && b.travelDate && b.travelDate < todayStr));
+      } else if (currentFilter === 'cancelled') {
+        filtered = filtered.filter(b => b.bookingStatus === 'Cancelled');
+      }
+
+      // Filter by search query
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase().trim();
+        filtered = filtered.filter(b => {
+          const ref = (b.referenceNumber || '').toLowerCase();
+          const title = (b.packageTitle || '').toLowerCase();
+          const dest = (b.destination || '').toLowerCase();
+          const name = (b.customerName || '').toLowerCase();
+          return ref.includes(q) || title.includes(q) || dest.includes(q) || name.includes(q);
+        });
+      }
+
+      // Sort
+      filtered.sort((a, b) => {
+        if (currentSort === 'booking-desc') {
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        } else if (currentSort === 'booking-asc') {
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        } else if (currentSort === 'date-asc') {
+          return (a.travelDate || '') > (b.travelDate || '') ? 1 : -1;
+        } else if (currentSort === 'date-desc') {
+          return (b.travelDate || '') > (a.travelDate || '') ? 1 : -1;
+        }
+        return 0;
+      });
+
+      return filtered;
+    }
+
+    // 4. Render Bookings List
+    function renderList() {
+      if (!bookingsList) return;
+
+      // Handle completely empty storage state
+      if (bookings.length === 0) {
+        bookingsList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">&#128197;</div>
+            <h2 class="empty-state-title">No Tour Bookings Found</h2>
+            <p class="empty-state-desc">
+              You haven't made any package reservations yet. Explore our handcrafted tours across Tamil Nadu and discover unforgettable destinations.
+            </p>
+            <div class="d-flex justify-center gap-md" style="margin-top: var(--space-md); flex-wrap: wrap;">
+              <a href="packages.html" class="btn btn-primary btn-lg">Browse Tourism Packages &rarr;</a>
+              <button type="button" id="btnSeedSampleBookings" class="btn btn-secondary btn-lg">
+                &#9881; Load Demo Sample Bookings
+              </button>
+            </div>
+          </div>
+        `;
+
+        const btnSeed = document.getElementById('btnSeedSampleBookings');
+        if (btnSeed) {
+          btnSeed.addEventListener('click', function () {
+            bookings = BookingService.seedSampleBookings();
+            renderKpiCards();
+            renderList();
+            showToast('Demonstration sample bookings loaded successfully!');
+          });
+        }
+        return;
+      }
+
+      const filtered = getFilteredBookings();
+
+      // Handle empty filter/search results
+      if (filtered.length === 0) {
+        bookingsList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">&#128269;</div>
+            <h2 class="empty-state-title">No Matching Bookings</h2>
+            <p class="empty-state-desc">
+              No reservation records matched your search "${searchQuery || currentFilter}". Try resetting your filter criteria or search keyword.
+            </p>
+            <button type="button" id="btnResetFilters" class="btn btn-primary btn-md" style="margin-top: 14px;">
+              Reset Filters & Search
+            </button>
+          </div>
+        `;
+
+        const btnReset = document.getElementById('btnResetFilters');
+        if (btnReset) {
+          btnReset.addEventListener('click', function () {
+            currentFilter = 'all';
+            searchQuery = '';
+            if (searchInput) searchInput.value = '';
+            filterTabs.forEach(tab => {
+              if (tab.getAttribute('data-filter') === 'all') tab.classList.add('active');
+              else tab.classList.remove('active');
+            });
+            renderList();
+          });
+        }
+        return;
+      }
+
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // Render cards
+      bookingsList.innerHTML = filtered.map(b => {
+        const isCancelled = b.bookingStatus === 'Cancelled';
+        const isCompleted = !isCancelled && (b.bookingStatus === 'Completed' || (b.bookingStatus === 'Confirmed' && b.travelDate && b.travelDate < todayStr));
+        const isUpcoming = !isCancelled && !isCompleted;
+
+        let statusClass = 'status-confirmed';
+        let statusLabel = 'Confirmed';
+
+        if (isCancelled) {
+          statusClass = 'status-cancelled';
+          statusLabel = 'Cancelled';
+        } else if (isCompleted) {
+          statusClass = 'status-completed';
+          statusLabel = 'Completed';
+        } else {
+          statusClass = 'status-upcoming';
+          statusLabel = 'Upcoming';
+        }
+
+        const canCancel = isUpcoming;
+        const imgUrl = b.packageImage || 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80';
+
+        return `
+          <article class="my-booking-card" data-booking-id="${b.id}">
+            
+            <div class="booking-card-media">
+              <img src="${imgUrl}" alt="${b.packageTitle}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80'">
+            </div>
+
+            <div class="booking-card-body">
+              <div>
+                <div class="booking-card-top">
+                  <span class="booking-ref-badge">${b.referenceNumber}</span>
+                  <div class="booking-badges-wrap">
+                    <span class="badge-status ${statusClass}">&#9679; ${statusLabel}</span>
+                    <span class="badge-payment">&#128179; ${b.paymentMethod || 'UPI'} &bull; ${b.paymentStatus || 'Simulated'}</span>
+                  </div>
+                </div>
+
+                <h2 class="booking-card-title">
+                  <a href="package-details.html?id=${b.packageId}">${b.packageTitle}</a>
+                </h2>
+
+                <div class="booking-card-meta-row">
+                  <span class="booking-meta-item">&#128205; <strong>${b.destination}</strong></span>
+                  <span class="booking-meta-item">&#128197; Departure: <strong>${b.travelDate}</strong></span>
+                  <span class="booking-meta-item">&#128101; <strong>${b.travellerCount}</strong> Traveller${b.travellerCount > 1 ? 's' : ''}</span>
+                  <span class="booking-meta-item">&#128100; Lead: ${b.customerName}</span>
+                </div>
+              </div>
+
+              <div class="booking-card-bottom">
+                <div class="booking-price-group">
+                  <span class="booking-price-label">Total Booking Amount</span>
+                  <div class="booking-price-total">
+                    &#8377;${(b.grandTotal || 0).toLocaleString('en-IN')}
+                    <span style="font-size: 0.75rem; font-weight: normal; color: var(--color-text-light);">(incl. 5% GST)</span>
+                  </div>
+                </div>
+
+                <div class="booking-card-actions">
+                  <button type="button" class="btn btn-secondary btn-sm btn-view-details" data-id="${b.id}">
+                    View Details &rarr;
+                  </button>
+                  ${canCancel ? `
+                    <button type="button" class="btn btn-outline btn-sm btn-cancel-booking" data-id="${b.id}" style="border: 1px solid var(--color-border); color: var(--color-status-cancelled);">
+                      Cancel Booking
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+
+            </div>
+
+          </article>
+        `;
+      }).join('');
+
+      // Wire View Details buttons
+      const detailBtns = bookingsList.querySelectorAll('.btn-view-details');
+      detailBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+          const bId = this.getAttribute('data-id');
+          const targetBooking = bookings.find(b => String(b.id) === String(bId));
+          if (targetBooking) openDetailsModal(targetBooking);
+        });
+      });
+
+      // Wire Cancel Booking buttons
+      const cancelBtns = bookingsList.querySelectorAll('.btn-cancel-booking');
+      cancelBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+          const bId = this.getAttribute('data-id');
+          const targetBooking = bookings.find(b => String(b.id) === String(bId));
+          if (targetBooking) openCancelModal(targetBooking);
+        });
+      });
+    }
+
+    // 5. Open Detailed View Modal
+    function openDetailsModal(booking) {
+      if (!modalDialog || !modalOverlay) return;
+
+      const isCancelled = booking.bookingStatus === 'Cancelled';
+      const todayStr = new Date().toISOString().split('T')[0];
+      const isCompleted = !isCancelled && (booking.bookingStatus === 'Completed' || (booking.bookingStatus === 'Confirmed' && booking.travelDate && booking.travelDate < todayStr));
+      const canCancel = !isCancelled && !isCompleted;
+
+      modalDialog.innerHTML = `
+        <div class="booking-modal-header">
+          <div>
+            <h3 class="booking-modal-title" id="modalTitle">Booking Details</h3>
+            <span class="booking-ref-badge" style="margin-top: 4px;">${booking.referenceNumber}</span>
+          </div>
+          <button type="button" class="booking-modal-close" id="btnCloseModal" aria-label="Close dialog">&times;</button>
+        </div>
+
+        <div class="booking-modal-body">
+          
+          <div style="display: flex; gap: 14px; margin-bottom: var(--space-md); padding-bottom: var(--space-md); border-bottom: 1px solid var(--color-border);">
+            <img src="${booking.packageImage || 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80'}" alt="${booking.packageTitle}" style="width: 100px; height: 75px; object-fit: cover; border-radius: var(--radius-sm);" onerror="this.src='https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80'">
+            <div>
+              <h4 style="font-size: 1.1rem; color: var(--color-primary-dark); margin-bottom: 2px;">${booking.packageTitle}</h4>
+              <div style="font-size: 0.85rem; color: var(--color-text-muted);">&#128205; ${booking.destination}</div>
+              <div style="font-size: 0.85rem; color: var(--color-text-muted);">&#128197; Departure Date: <strong>${booking.travelDate}</strong></div>
+            </div>
+          </div>
+
+          <table class="booking-summary-table" style="margin: 0 0 var(--space-md) 0;">
+            <tbody>
+              <tr>
+                <td style="color: var(--color-text-muted); width: 40%;">Booking Status</td>
+                <td>
+                  <span class="badge ${isCancelled ? 'badge-warning' : (isCompleted ? 'badge-primary' : 'badge-success')}">
+                    ${booking.bookingStatus}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td style="color: var(--color-text-muted);">Payment Method & Status</td>
+                <td>${booking.paymentMethod || 'UPI'} &bull; ${booking.paymentStatus || 'Simulated'}</td>
+              </tr>
+              <tr>
+                <td style="color: var(--color-text-muted);">Number of Travellers</td>
+                <td>${booking.travellerCount} Person(s)</td>
+              </tr>
+              <tr>
+                <td style="color: var(--color-text-muted);">Base Price Per Person</td>
+                <td>&#8377;${(booking.pricePerPerson || 0).toLocaleString('en-IN')}</td>
+              </tr>
+              <tr>
+                <td style="color: var(--color-text-muted);">Subtotal</td>
+                <td>&#8377;${(booking.subtotal || 0).toLocaleString('en-IN')}</td>
+              </tr>
+              <tr>
+                <td style="color: var(--color-text-muted);">GST (5%)</td>
+                <td>&#8377;${(booking.gstAmount || 0).toLocaleString('en-IN')}</td>
+              </tr>
+              <tr>
+                <td style="color: var(--color-text-muted); font-weight: 700;">Grand Total</td>
+                <td style="font-size: 1.2rem; font-weight: 800; color: var(--color-primary-dark);">
+                  &#8377;${(booking.grandTotal || 0).toLocaleString('en-IN')}
+                </td>
+              </tr>
+              <tr>
+                <td style="color: var(--color-text-muted);">Lead Traveller</td>
+                <td>${booking.customerName}</td>
+              </tr>
+              <tr>
+                <td style="color: var(--color-text-muted);">Email Address</td>
+                <td>${booking.customerEmail}</td>
+              </tr>
+              <tr>
+                <td style="color: var(--color-text-muted);">Mobile Contact</td>
+                <td>+91 ${booking.customerPhone}</td>
+              </tr>
+              ${booking.specialRequests ? `
+                <tr>
+                  <td style="color: var(--color-text-muted);">Special Requests</td>
+                  <td>${booking.specialRequests}</td>
+                </tr>
+              ` : ''}
+              ${isCancelled ? `
+                <tr style="background: #FFF5F5;">
+                  <td style="color: var(--color-status-cancelled); font-weight: 700;">Cancellation Reason</td>
+                  <td style="color: var(--color-status-cancelled);">${booking.cancellationReason || 'Cancelled by customer'} (${booking.cancelledAt ? new Date(booking.cancelledAt).toLocaleDateString() : 'N/A'})</td>
+                </tr>
+              ` : ''}
+              <tr>
+                <td style="color: var(--color-text-muted);">Booking Timestamp</td>
+                <td><small>${booking.createdAt ? new Date(booking.createdAt).toLocaleString() : 'N/A'}</small></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="background: var(--color-bg-warm); border-radius: var(--radius-sm); padding: 12px; font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.4;">
+            <strong>Academic Demonstration Notice:</strong> This booking is recorded in browser local demonstration storage (<code>yaadhum_demo_bookings</code>) for evaluation. No live transaction or payment gateway charge has occurred.
+          </div>
+
+        </div>
+
+        <div class="booking-modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnPrintReceiptBtn">
+            &#128424; Print Summary
+          </button>
+          ${canCancel ? `
+            <button type="button" class="btn btn-outline btn-sm" id="btnModalCancelAction" style="border: 1px solid var(--color-status-cancelled); color: var(--color-status-cancelled);">
+              Cancel Reservation
+            </button>
+          ` : ''}
+          <button type="button" class="btn btn-primary btn-sm" id="btnModalCloseAction">
+            Close
+          </button>
+        </div>
+      `;
+
+      modalOverlay.classList.add('is-active');
+
+      // Wire Close buttons
+      const btnClose = document.getElementById('btnCloseModal');
+      const btnCloseAction = document.getElementById('btnModalCloseAction');
+      if (btnClose) btnClose.addEventListener('click', closeModal);
+      if (btnCloseAction) btnCloseAction.addEventListener('click', closeModal);
+
+      // Wire Print
+      const btnPrint = document.getElementById('btnPrintReceiptBtn');
+      if (btnPrint) {
+        btnPrint.addEventListener('click', () => {
+          if (typeof window !== 'undefined' && typeof window.print === 'function') {
+            window.print();
+          }
+        });
+      }
+
+      // Wire Cancel from Details
+      const btnModalCancel = document.getElementById('btnModalCancelAction');
+      if (btnModalCancel) {
+        btnModalCancel.addEventListener('click', () => {
+          closeModal();
+          openCancelModal(booking);
+        });
+      }
+    }
+
+    // 6. Open Cancellation Confirmation Modal
+    function openCancelModal(booking) {
+      if (!modalDialog || !modalOverlay) return;
+
+      modalDialog.innerHTML = `
+        <div class="booking-modal-header" style="background: #FFF8E1; border-bottom-color: var(--color-terracotta);">
+          <div>
+            <h3 class="booking-modal-title" style="color: var(--color-terracotta-dark);" id="modalTitle">
+              Confirm Booking Cancellation
+            </h3>
+            <span class="booking-ref-badge" style="margin-top: 4px;">${booking.referenceNumber}</span>
+          </div>
+          <button type="button" class="booking-modal-close" id="btnCloseCancelModal" aria-label="Close dialog">&times;</button>
+        </div>
+
+        <div class="booking-modal-body">
+          <div class="cancel-warning-banner">
+            <strong>Demonstration Cancellation Policy:</strong>
+            <p style="margin: 4px 0 0 0;">
+              This is an academic project prototype. Confirming cancellation will update your local demonstration booking record to <strong>Cancelled</strong>.
+              No actual card refund or monetary reversal is processed. In the production deployment, Person 2's backend handles seat replenishment and 48-hour eligibility verification.
+            </p>
+          </div>
+
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: var(--space-md);">
+            <h4 style="margin: 0 0 6px 0; color: var(--color-primary-dark); font-size: 1.05rem;">${booking.packageTitle}</h4>
+            <div style="font-size: 0.88rem; color: var(--color-text-muted); line-height: 1.5;">
+              &#128205; Destination: <strong>${booking.destination}</strong><br>
+              &#128197; Departure: <strong>${booking.travelDate}</strong> (${booking.travellerCount} Traveller(s))<br>
+              &#128176; Amount Paid: <strong>&#8377;${(booking.grandTotal || 0).toLocaleString('en-IN')}</strong> (${booking.paymentMethod || 'UPI'})
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cancelReasonSelect" class="form-label">
+              Reason for Cancellation <span style="color: var(--color-text-light); font-weight: normal;">(Required for demo record)</span>
+            </label>
+            <select id="cancelReasonSelect" class="form-control" style="font-size: 0.9rem;">
+              <option value="Change in personal travel plans">Change in personal travel plans</option>
+              <option value="Scheduling or work conflict">Scheduling or work conflict</option>
+              <option value="Medical / emergency situation">Medical / emergency situation</option>
+              <option value="Booked alternate Tamil Nadu package">Booked alternate Tamil Nadu package</option>
+              <option value="Academic test / demonstration evaluation">Academic test / demonstration evaluation</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="booking-modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnDismissCancelModal">
+            Keep My Booking
+          </button>
+          <button type="button" class="btn btn-terracotta btn-sm" id="btnConfirmCancelBooking">
+            Yes, Cancel This Booking (Demo) &rarr;
+          </button>
+        </div>
+      `;
+
+      modalOverlay.classList.add('is-active');
+
+      const btnClose = document.getElementById('btnCloseCancelModal');
+      const btnDismiss = document.getElementById('btnDismissCancelModal');
+      const btnConfirm = document.getElementById('btnConfirmCancelBooking');
+      const reasonSelect = document.getElementById('cancelReasonSelect');
+
+      if (btnClose) btnClose.addEventListener('click', closeModal);
+      if (btnDismiss) btnDismiss.addEventListener('click', closeModal);
+
+      if (btnConfirm) {
+        btnConfirm.addEventListener('click', async function () {
+          btnConfirm.disabled = true;
+          btnConfirm.textContent = 'Cancelling...';
+
+          const reason = reasonSelect ? reasonSelect.value : 'Customer requested cancellation (Demo)';
+          const res = await BookingService.cancelBooking(booking.id, reason);
+
+          closeModal();
+
+          if (res.success) {
+            bookings = BookingService.getBookings();
+            renderKpiCards();
+            renderList();
+            showToast(`Booking ${booking.referenceNumber} has been successfully cancelled (Demonstration Mode).`, 'success');
+          } else {
+            showToast(res.error || 'Failed to cancel booking.', 'error');
+          }
+        });
+      }
+    }
+
+    // 7. Close Modal Helper
+    function closeModal() {
+      if (!modalOverlay) return;
+      modalOverlay.classList.remove('is-active');
+      if (modalDialog) modalDialog.innerHTML = '';
+    }
+
+    // Modal background click and Esc key listeners
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', function (e) {
+        if (e.target === modalOverlay) closeModal();
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modalOverlay && modalOverlay.classList.contains('is-active')) {
+        closeModal();
+      }
+    });
+
+    // 8. Wire Search, Filter Tabs & Sort Select
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        searchQuery = this.value;
+        renderList();
+      });
+    }
+
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        filterTabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        currentFilter = this.getAttribute('data-filter');
+        renderList();
+      });
+    });
+
+    if (sortSelect) {
+      sortSelect.addEventListener('change', function () {
+        currentSort = this.value;
+        renderList();
+      });
+    }
+
+    // Initial Render
+    renderKpiCards();
+    renderList();
+  }
+
   // Export public API
   return {
     apiClient,
@@ -2351,6 +3986,7 @@
     PackageService,
     WishlistService,
     CompareService,
+    BookingService,
     DESTINATIONS_DATA,
     PACKAGES_DATA,
     CONFIG
