@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Logs - YAADHUM OOORE</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Super Administrator Control Panel</p>
+    </header>
+
+    <nav>
+        <a href="superadmin-dashboard.html">Dashboard</a>
+        <a href="manage-admins.html">Manage Admins</a>
+        <a href="permissions.html">Permissions</a>
+        <a href="system-logs.html" class="active">System Logs</a>
+        <a href="system-settings.html">System Settings</a>
+        <a href="destination-updates.html">Destination Updates</a>
+    </nav>
+
+    <main>
+        <h2>System Activity Logs</h2>
+        <p>Monitor and review activities performed across the platform.</p>
+
+        <!-- Log Statistics -->
+        <section class="system-log-summary">
+
+            <div class="stat-card">
+                <h3>Total Activities</h3>
+                <p id="totalLogs">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Successful Activities</h3>
+                <p id="successfulLogs">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Failed Activities</h3>
+                <p id="failedLogs">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending Activities</h3>
+                <p id="pendingLogs">0</p>
+            </div>
+
+        </section>
+
+        <!-- Log Filters -->
+        <section class="system-log-section">
+
+            <div class="system-log-controls">
+
+                <input
+                    type="text"
+                    id="searchLog"
+                    placeholder="Search by administrator or activity"
+                >
+
+                <select id="activityFilter">
+                    <option value="All">All Activities</option>
+                    <option value="Login">Login</option>
+                    <option value="Logout">Logout</option>
+                    <option value="Customer">Customer</option>
+                    <option value="Provider">Provider</option>
+                    <option value="Package">Package</option>
+                    <option value="Booking">Booking</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Permissions">Permissions</option>
+                </select>
+
+                <select id="logStatusFilter">
+                    <option value="All">All Results</option>
+                    <option value="Successful">Successful</option>
+                    <option value="Failed">Failed</option>
+                    <option value="Pending">Pending</option>
+                </select>
+
+                <input type="date" id="logDateFilter">
+
+                <button type="button" id="clearLogFilters">
+                    Clear Filters
+                </button>
+
+            </div>
+
+            <!-- System Logs Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Log ID</th>
+                            <th>Administrator</th>
+                            <th>Activity Type</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="systemLogTableBody"></tbody>
+                </table>
+            </div>
+
+            <p id="noLogsMessage" class="empty-message" hidden>
+                No system logs found.
+            </p>
+
+        </section>
+    </main>
+
+    <script src="js/system-logs.js"></script>
+
+</body>
+</html>

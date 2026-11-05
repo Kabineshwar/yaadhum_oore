@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Manage Destinations - YAADHUM OOORE</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Local Tourism Administration Portal</p>
+    </header>
+
+    <nav>
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="manage-customers.html">Customers</a>
+        <a href="manage-providers.html">Providers</a>
+        <a href="manage-destinations.html" class="active">Destinations</a>
+        <a href="manage-categories.html">Categories</a>
+        <a href="manage-packages.html">Packages</a>
+        <a href="manage-bookings.html">Bookings</a>
+        <a href="reports.html">Reports</a>
+    </nav>
+
+    <main>
+
+        <h2>Manage Destinations</h2>
+        <p>Add, edit, search and manage tourism destinations.</p>
+
+        <!-- Destination Statistics -->
+        <section class="destination-summary">
+
+            <div class="stat-card">
+                <h3>Total Destinations</h3>
+                <p id="totalDestinations">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Active Destinations</h3>
+                <p id="activeDestinations">0</p>
+            </div>
+
+        </section>
+
+        <!-- Destination Management -->
+        <section class="destination-management">
+
+            <div class="destination-controls">
+
+                <input
+                    type="text"
+                    id="searchDestination"
+                    placeholder="Search destinations..."
+                >
+
+                <select id="categoryFilter">
+                    <option value="All">All Categories</option>
+                    <option value="Hill Station">Hill Station</option>
+                    <option value="Beach">Beach</option>
+                    <option value="Heritage">Heritage</option>
+                    <option value="Nature">Nature</option>
+                </select>
+
+                <button id="addDestinationButton">
+                    + Add Destination
+                </button>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Destination</th>
+                            <th>State</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="destinationTableBody">
+                        <!-- JavaScript inserts destinations here -->
+                    </tbody>
+
+                </table>
+
+                <p id="emptyDestinationMessage" class="empty-message">
+                    No destinations found.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Add / Edit Destination Dialog -->
+    <dialog id="destinationDialog" class="destination-dialog">
+
+        <h2 id="dialogTitle">Add Destination</h2>
+
+        <form id="destinationForm">
+
+            <input type="hidden" id="destinationId">
+
+            <label for="destinationName">Destination Name</label>
+            <input
+                type="text"
+                id="destinationName"
+                required
+                placeholder="Enter destination name"
+            >
+
+            <label for="destinationState">State / Region</label>
+            <input
+                type="text"
+                id="destinationState"
+                required
+                placeholder="Enter state or region"
+            >
+
+            <label for="destinationCategory">Category</label>
+            <select id="destinationCategory" required>
+                <option value="">Select Category</option>
+                <option value="Hill Station">Hill Station</option>
+                <option value="Beach">Beach</option>
+                <option value="Heritage">Heritage</option>
+                <option value="Nature">Nature</option>
+            </select>
+
+            <label for="destinationDescription">Description</label>
+            <textarea
+                id="destinationDescription"
+                rows="4"
+                placeholder="Enter destination description"
+            ></textarea>
+
+            <div class="dialog-buttons">
+
+                <button type="submit" id="saveDestinationButton">
+                    Save Destination
+                </button>
+
+                <button type="button" id="closeDestinationDialog">
+                    Cancel
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+    <footer>
+        <p>YAADHUM OOORE - Administration Portal</p>
+    </footer>
+
+    <script src="js/manage-destinations.js"></script>
+
+</body>
+</html>

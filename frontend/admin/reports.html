@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reports - YAADHUM OOORE</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Local Tourism Administration Portal</p>
+    </header>
+
+    <nav>
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="manage-customers.html">Customers</a>
+        <a href="manage-providers.html">Providers</a>
+        <a href="manage-destinations.html">Destinations</a>
+        <a href="manage-categories.html">Categories</a>
+        <a href="manage-packages.html">Packages</a>
+        <a href="manage-bookings.html">Bookings</a>
+        <a href="reports.html" class="active">Reports</a>
+    </nav>
+
+    <main>
+
+        <h2>Reports and Analytics</h2>
+        <p>Overview of platform activity, bookings and revenue.</p>
+
+        <!-- Overall Statistics -->
+        <section class="report-summary">
+
+            <div class="stat-card">
+                <h3>Total Customers</h3>
+                <p id="reportCustomers">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Providers</h3>
+                <p id="reportProviders">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Bookings</h3>
+                <p id="reportBookings">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Revenue</h3>
+                <p id="reportRevenue">₹0</p>
+            </div>
+
+        </section>
+
+
+        <!-- Booking Statistics -->
+        <section class="report-section">
+
+            <h2>Booking Overview</h2>
+
+            <div class="booking-report-grid">
+
+                <div class="report-card">
+                    <h3>Pending Bookings</h3>
+                    <p id="reportPending">0</p>
+                </div>
+
+                <div class="report-card">
+                    <h3>Confirmed Bookings</h3>
+                    <p id="reportConfirmed">0</p>
+                </div>
+
+                <div class="report-card">
+                    <h3>Completed Bookings</h3>
+                    <p id="reportCompleted">0</p>
+                </div>
+
+                <div class="report-card">
+                    <h3>Cancelled Bookings</h3>
+                    <p id="reportCancelled">0</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Booking Status Chart -->
+        <section class="report-section">
+
+            <h2>Booking Status Distribution</h2>
+
+            <div id="bookingChart" class="report-chart">
+                <!-- JavaScript creates chart bars here -->
+            </div>
+
+        </section>
+
+
+        <!-- Popular Destinations -->
+        <section class="report-section">
+
+            <h2>Popular Destinations</h2>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Destination</th>
+                            <th>Number of Bookings</th>
+                            <th>Popularity</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="popularDestinationBody">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- Revenue Report -->
+        <section class="report-section">
+
+            <h2>Revenue Overview</h2>
+
+            <div class="revenue-card">
+
+                <p>Total Revenue from Confirmed and Completed Bookings</p>
+
+                <h2 id="revenueAmount">₹0</h2>
+
+                <p id="revenueDescription"></p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+        <p>YAADHUM OOORE - Administration Portal</p>
+    </footer>
+
+    <script src="js/reports.js"></script>
+
+</body>
+</html>

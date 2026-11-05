@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Super Admin Dashboard - YAADHUM OOORE</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Super Administrator Control Panel</p>
+    </header>
+
+    <nav>
+        <a href="superadmin-dashboard.html" class="active">Dashboard</a>
+        <a href="manage-admins.html">Manage Admins</a>
+        <a href="permissions.html">Permissions</a>
+        <a href="system-logs.html">System Logs</a>
+        <a href="system-settings.html">System Settings</a>
+        <a href="destination-updates.html">Destination Updates</a>
+    </nav>
+
+    <main>
+
+        <h2>Super Admin Dashboard</h2>
+        <p>Manage administrators and monitor the overall platform.</p>
+
+        <p id="superAdminDate"></p>
+
+        <!-- Statistics -->
+
+        <section class="superadmin-summary">
+
+            <div class="stat-card">
+                <h3>Total Administrators</h3>
+                <p id="totalAdmins">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Active Administrators</h3>
+                <p id="activeAdmins">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending Approvals</h3>
+                <p id="pendingAdmins">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>System Activities</h3>
+                <p id="totalActivities">0</p>
+            </div>
+
+        </section>
+
+
+        <!-- Quick Actions -->
+
+        <section class="superadmin-section">
+
+            <h3>Administrative Controls</h3>
+
+            <div class="superadmin-actions">
+
+                <a href="manage-admins.html" class="superadmin-action">
+                    <h4>Manage Administrators</h4>
+                    <p>Create, view and manage administrator accounts.</p>
+                </a>
+
+                <a href="permissions.html" class="superadmin-action">
+                    <h4>Manage Permissions</h4>
+                    <p>Control access to different system modules.</p>
+                </a>
+
+                <a href="system-logs.html" class="superadmin-action">
+                    <h4>System Logs</h4>
+                    <p>Monitor administrative activities and system events.</p>
+                </a>
+
+                <a href="system-settings.html" class="superadmin-action">
+                    <h4>System Settings</h4>
+                    <p>Configure general platform settings.</p>
+                </a>
+
+                <a href="destination-updates.html" class="superadmin-action">
+                    <h4>Destination Updates</h4>
+                    <p>Review and manage destination update requests.</p>
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- Recent Activities -->
+
+        <section class="superadmin-section">
+
+            <h3>Recent System Activities</h3>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Activity ID</th>
+                            <th>Administrator</th>
+                            <th>Activity</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="activityTableBody">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        <p>YAADHUM OOORE - Super Administration Portal</p>
+    </footer>
+
+    <script src="js/superadmin.js"></script>
+
+</body>
+</html>

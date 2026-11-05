@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bookings - YAADHUM OOORE</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Local Tourism Administration Portal</p>
+    </header>
+
+    <nav>
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="manage-customers.html">Customers</a>
+        <a href="manage-providers.html">Providers</a>
+        <a href="manage-destinations.html">Destinations</a>
+        <a href="manage-categories.html">Categories</a>
+        <a href="manage-packages.html">Packages</a>
+        <a href="manage-bookings.html" class="active">Bookings</a>
+        <a href="reports.html">Reports</a>
+    </nav>
+
+    <main>
+
+        <h2>Manage Bookings</h2>
+        <p>View customer reservations and manage booking statuses.</p>
+
+        <section class="booking-summary">
+
+            <div class="stat-card">
+                <h3>Total Bookings</h3>
+                <p id="totalBookings">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <p id="pendingBookings">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Confirmed</h3>
+                <p id="confirmedBookings">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Cancelled</h3>
+                <p id="cancelledBookings">0</p>
+            </div>
+
+        </section>
+
+        <section class="booking-management">
+
+            <div class="booking-controls">
+
+                <input
+                    type="text"
+                    id="searchBooking"
+                    placeholder="Search customer or destination..."
+                >
+
+                <select id="bookingStatusFilter">
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Package</th>
+                            <th>Travel Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="bookingTableBody"></tbody>
+                </table>
+
+                <p id="emptyBookingMessage" class="empty-message">
+                    No bookings found.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Booking details dialog -->
+    <dialog id="bookingDialog" class="booking-dialog">
+
+        <h2>Booking Details</h2>
+
+        <div id="bookingDetails"></div>
+
+        <button type="button" id="closeBookingDialog">
+            Close
+        </button>
+
+    </dialog>
+
+    <footer>
+        <p>YAADHUM OOORE - Administration Portal</p>
+    </footer>
+
+    <script src="js/manage-bookings.js"></script>
+
+</body>
+</html>

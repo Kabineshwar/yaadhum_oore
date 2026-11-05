@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Manage Packages - YAADHUM OOORE</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Local Tourism Administration Portal</p>
+    </header>
+
+    <nav>
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="manage-customers.html">Customers</a>
+        <a href="manage-providers.html">Providers</a>
+        <a href="manage-destinations.html">Destinations</a>
+        <a href="manage-categories.html">Categories</a>
+        <a href="manage-packages.html" class="active">Packages</a>
+        <a href="manage-bookings.html">Bookings</a>
+        <a href="reports.html">Reports</a>
+    </nav>
+
+    <main>
+
+        <h2>Manage Tourism Packages</h2>
+
+        <p>
+            Review packages submitted by tourism providers
+            and approve or reject their applications.
+        </p>
+
+        <!-- PACKAGE STATISTICS -->
+
+        <section class="package-summary">
+
+            <div class="stat-card">
+                <h3>Total Packages</h3>
+                <h2 id="totalPackages">0</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>Approved</h3>
+                <h2 id="approvedPackages">0</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <h2 id="pendingPackages">0</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>Rejected</h3>
+                <h2 id="rejectedPackages">0</h2>
+            </div>
+
+        </section>
+
+
+        <!-- PACKAGE MANAGEMENT -->
+
+        <section class="package-management">
+
+            <h3>Submitted Tourism Packages</h3>
+
+            <div class="package-controls">
+
+                <input
+                    type="text"
+                    id="searchPackage"
+                    placeholder="Search package or provider..."
+                >
+
+                <select id="packageStatusFilter">
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Package ID</th>
+                            <th>Package Name</th>
+                            <th>Provider</th>
+                            <th>Destination</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="packageTableBody">
+                        <!-- Package rows generated using JavaScript -->
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <p id="packageEmptyMessage" class="empty-message" hidden>
+                No packages found.
+            </p>
+
+        </section>
+
+    </main>
+
+
+    <!-- PACKAGE DETAILS DIALOG -->
+
+    <dialog id="packageDialog">
+
+        <h3>Package Details</h3>
+
+        <div id="packageDetails"></div>
+
+        <button type="button" id="closePackageDialog" class="button">
+            Close
+        </button>
+
+    </dialog>
+
+
+    <footer>
+        <p>YAADHUM OOORE | Explore Your World</p>
+    </footer>
+
+    <script src="js/manage-packages.js"></script>
+
+</body>
+</html>

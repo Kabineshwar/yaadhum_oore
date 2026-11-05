@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destination Updates - YAADHUM OOORE</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Super Administrator Control Panel</p>
+    </header>
+
+    <nav>
+        <a href="superadmin-dashboard.html">Dashboard</a>
+        <a href="manage-admins.html">Manage Admins</a>
+        <a href="permissions.html">Permissions</a>
+        <a href="system-logs.html">System Logs</a>
+        <a href="system-settings.html">System Settings</a>
+        <a href="destination-updates.html" class="active">Destination Updates</a>
+    </nav>
+
+    <main>
+        <h2>Destination Updates</h2>
+        <p>Review and manage destination information submitted for the platform.</p>
+
+        <!-- Update Statistics -->
+        <section class="destination-update-summary">
+
+            <div class="stat-card">
+                <h3>Total Updates</h3>
+                <p id="totalUpdates">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <p id="pendingUpdates">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Approved</h3>
+                <p id="approvedUpdates">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Rejected</h3>
+                <p id="rejectedUpdates">0</p>
+            </div>
+
+        </section>
+
+        <!-- Search and Filters -->
+        <section class="destination-update-section">
+
+            <div class="destination-update-controls">
+
+                <input
+                    type="text"
+                    id="searchDestinationUpdate"
+                    placeholder="Search destination or submitted by"
+                >
+
+                <select id="destinationUpdateStatus">
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+
+            </div>
+
+            <!-- Updates Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Update ID</th>
+                            <th>Destination</th>
+                            <th>Submitted By</th>
+                            <th>Update Type</th>
+                            <th>Submitted Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="destinationUpdateTableBody"></tbody>
+                </table>
+            </div>
+
+            <p id="noDestinationUpdates" class="empty-message" hidden>
+                No destination updates found.
+            </p>
+
+        </section>
+    </main>
+
+    <!-- View Update Details -->
+    <dialog id="destinationUpdateDialog" class="destination-update-dialog">
+
+        <h2>Destination Update Details</h2>
+
+        <div id="destinationUpdateDetails"></div>
+
+        <div class="destination-update-dialog-actions">
+            <button type="button" id="closeDestinationUpdateDialog">
+                Close
+            </button>
+        </div>
+
+    </dialog>
+
+    <script src="js/destination-updates.js"></script>
+
+</body>
+</html>
