@@ -1,65 +1,34 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Packages - YAADHUM OOORE</title>
-    <link rel="stylesheet" href="css/provider.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Packages - YAADHUM OOORE</title>
+<link rel="stylesheet" href="css/provider.css">
 </head>
 <body>
+<header><h1>YAADHUM OOORE</h1><p>Local Tourism Provider Portal</p></header>
 
-    <header>
-        <h1>YAADHUM OOORE</h1>
-        <p>Local Tourism Provider Portal</p>
-    </header>
+<nav>
+<a href="provider-dashboard.html">Dashboard</a>
+<a href="my-packages.html">My Packages</a>
+<a href="add-package.html">Add Package</a>
+<a href="provider-bookings.html">Bookings</a>
+<a href="package-availability.html">Availability</a>
+<a href="provider-profile.html">Profile</a>
+<a href="provider-reviews.html">Reviews</a>
+<a href="provider-reports.html">Reports</a>
+</nav>
 
-    <nav>
-        <a href="provider-dashboard.html">Dashboard</a>
-        <a href="my-packages.html">My Packages</a>
-        <a href="add-package.html">Add Package</a>
-        <a href="provider-bookings.html">Bookings</a>
-    </nav>
+<main>
 
-    <main>
-        <h2>My Tourism Packages</h2>
-        <p>View and manage the tourism packages you offer.</p>
+<h2>My Tourism Packages</h2><p>View, edit or remove packages you have created.</p>
+<div id="packageList" class="cards"></div>
+<p><a class="button" href="add-package.html">Add New Package</a></p>
+<p class="note">Packages created in this browser will appear here. Existing sample package cards are not stored in the database.</p>
 
-        <section class="cards">
-            <div class="card">
-                <h3>Ooty Weekend Trip</h3>
-                <p><strong>Destination:</strong> Ooty</p>
-                <p><strong>Duration:</strong> 2 days, 1 night</p>
-                <p><strong>Price:</strong> ₹2,500 per person</p>
-                <p><strong>Seats:</strong> 10</p>
-                <p class="note">Status: Active</p>
-            </div>
-
-            <div class="card">
-                <h3>Kodaikanal Nature Tour</h3>
-                <p><strong>Destination:</strong> Kodaikanal</p>
-                <p><strong>Duration:</strong> 3 days, 2 nights</p>
-                <p><strong>Price:</strong> ₹4,000 per person</p>
-                <p><strong>Seats:</strong> 8</p>
-                <p class="note">Status: Active</p>
-            </div>
-        </section>
-
-        <p>
-            <a class="button" href="add-package.html">
-                Add New Package
-            </a>
-        </p>
-
-        <p class="note">
-            Sample packages are displayed for demonstration.
-            Database integration will be added later.
-        </p>
-    </main>
-
-    <footer>
-        <p>YAADHUM OOORE | Explore Your World</p>
-    </footer>
-
+</main>
+<footer><p>YAADHUM OOORE | Explore Your World</p></footer>
+<script src="js/provider.js"></script>
 </body>
 </html>

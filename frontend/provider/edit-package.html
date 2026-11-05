@@ -1,75 +1,45 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Package - YAADHUM OOORE</title>
-    <link rel="stylesheet" href="css/provider.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Package - YAADHUM OOORE</title>
+<link rel="stylesheet" href="css/provider.css">
 </head>
 <body>
+<header><h1>YAADHUM OOORE</h1><p>Local Tourism Provider Portal</p></header>
 
-    <header>
-        <h1>YAADHUM OOORE</h1>
-        <p>Local Tourism Provider Portal</p>
-    </header>
+<nav>
+<a href="provider-dashboard.html">Dashboard</a>
+<a href="my-packages.html">My Packages</a>
+<a href="add-package.html">Add Package</a>
+<a href="provider-bookings.html">Bookings</a>
+<a href="package-availability.html">Availability</a>
+<a href="provider-profile.html">Profile</a>
+<a href="provider-reviews.html">Reviews</a>
+<a href="provider-reports.html">Reports</a>
+</nav>
 
-    <nav>
-        <a href="provider-dashboard.html">Dashboard</a>
-        <a href="my-packages.html">My Packages</a>
-        <a href="add-package.html">Add Package</a>
-        <a href="provider-bookings.html">Bookings</a>
-    </nav>
+<main>
 
-    <main>
-        <h2>Edit Tourism Package</h2>
-        <p>Update the details of your tourism package.</p>
+<h2>Edit Tourism Package</h2><p>Update the selected package details.</p>
+<form id="editPackageForm">
+<input type="hidden" id="packageId">
+<label for="name">Package Name</label><input id="name" required>
+<label for="destination">Destination</label><input id="destination" required>
+<label for="category">Category</label><select id="category" required><option>Adventure</option><option>Nature</option><option>Cultural</option><option>Beach</option><option>Pilgrimage</option></select>
+<label for="price">Price Per Person (₹)</label><input type="number" id="price" min="1" step="0.01" required>
+<label for="duration">Duration</label><input id="duration" required>
+<label for="capacity">Available Seats</label><input type="number" id="capacity" min="1" required>
+<label for="startDate">Start Date</label><input type="date" id="startDate" required>
+<label for="endDate">End Date</label><input type="date" id="endDate" required>
+<label for="description">Description</label><textarea id="description" rows="4"></textarea>
+<label for="itinerary">Itinerary</label><textarea id="itinerary" rows="5"></textarea>
+<button type="submit">Update Package</button><p id="message" class="message" aria-live="polite"></p>
+</form>
 
-        <form>
-
-            <label for="name">Package Name</label>
-            <input type="text" id="name" value="Ooty Weekend Trip" required>
-
-            <label for="destination">Destination</label>
-            <input type="text" id="destination" value="Ooty" required>
-
-            <label for="category">Category</label>
-            <select id="category">
-                <option value="nature">Nature</option>
-                <option value="adventure">Adventure</option>
-                <option value="cultural">Cultural</option>
-                <option value="beach">Beach</option>
-                <option value="pilgrimage">Pilgrimage</option>
-            </select>
-
-            <label for="price">Price Per Person (₹)</label>
-            <input type="number" id="price" value="2500" required>
-
-            <label for="duration">Duration</label>
-            <input type="text" id="duration" value="2 days, 1 night" required>
-
-            <label for="seats">Available Seats</label>
-            <input type="number" id="seats" value="10" required>
-
-            <label for="description">Description</label>
-            <textarea id="description" rows="4">Enjoy a beautiful weekend trip to Ooty.</textarea>
-
-            <label for="itinerary">Itinerary</label>
-            <textarea id="itinerary" rows="4">Day 1: Arrival and sightseeing.
-Day 2: Visit tourist attractions and return.</textarea>
-
-            <button type="submit">Update Package</button>
-
-        </form>
-
-        <p class="note">
-            Package updates will be connected to the database later.
-        </p>
-    </main>
-
-    <footer>
-        <p>YAADHUM OOORE | Explore Your World</p>
-    </footer>
-
+</main>
+<footer><p>YAADHUM OOORE | Explore Your World</p></footer>
+<script src="js/provider.js"></script>
 </body>
 </html>
