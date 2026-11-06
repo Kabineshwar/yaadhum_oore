@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Discover scenic hill stations, ancient Chola heritage temples, pristine coastlines, and wildlife sanctuaries across Tamil Nadu with YAADHUM OOORE.">
+  <title>Explore Destinations | YAADHUM OOORE</title>
+  
+  <!-- Shared Customer Design System -->
+  <link rel="stylesheet" href="css/customer.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container">
+      <span class="tamil-phrase" style="color: var(--color-gold);">"யாதும் ஊரே யாவரும் கேளிர்"</span>
+      &nbsp;&bull;&nbsp; To us all towns are one, all people our kin &nbsp;&bull;&nbsp;
+      <strong>Destinations Across Tamil Nadu</strong>
+    </div>
+  </div>
+
+  <!-- Primary Header & Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="nav-wrapper">
+        
+        <!-- Brand Logo -->
+        <a href="../index.html" class="brand-logo" aria-label="YAADHUM OOORE Home">
+          <div class="logo-badge">ய</div>
+          <div class="brand-text-group">
+            <span class="brand-title">YAADHUM OOORE</span>
+            <span class="brand-subtitle">Local Tourism Platform</span>
+          </div>
+        </a>
+
+        <!-- Mobile Navigation Toggle -->
+        <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu">
+          &#9776;
+        </button>
+
+        <!-- Main Navigation Links -->
+        <nav class="nav-links" id="mainNav">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="destinations.html" class="nav-link active">Destinations</a>
+          <a href="packages.html" class="nav-link">Packages</a>
+          <a href="search-packages.html" class="nav-link">Search</a>
+          <a href="compare.html" class="nav-link">Compare</a>
+          <a href="wishlist.html" class="nav-link">Wishlist</a>
+        </nav>
+
+        <!-- Navigation Actions -->
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-secondary btn-sm">Log In</a>
+          <a href="register.html" class="btn btn-primary btn-sm">Register</a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Page Hero Banner -->
+    <section class="page-hero">
+      <div class="container">
+        <div class="page-hero-breadcrumb">
+          <a href="../index.html">Home</a> &rsaquo; <span>Destinations</span>
+        </div>
+        <h1 class="page-hero-title">Explore Iconic Destinations</h1>
+        <p class="page-hero-subtitle">
+          From the mist-crowned heights of the Nilgiris to the sacred shores of Rameswaram, discover authentic places curated by local hosts.
+        </p>
+
+        <!-- Search Destinations Input -->
+        <div style="margin-top: 24px;">
+          <div class="search-bar-prominent">
+            <span style="font-size: 1.2rem; color: var(--color-primary);">&#128269;</span>
+            <input 
+              type="text" 
+              id="destSearchInput" 
+              placeholder="Search by destination name, district, or landmark (e.g. Ooty, Madurai, Valparai)..." 
+              aria-label="Search destinations"
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Destination Filter Controls & Catalog -->
+    <section class="section" style="padding-top: var(--space-xl);">
+      <div class="container">
+
+        <!-- Academic Demonstration Notice -->
+        <div class="alert alert-demo is-visible" style="margin-bottom: 24px;">
+          <strong>Academic Demonstration Mode:</strong> Displaying 12 curated Tamil Nadu destinations. Dynamic filtering and search are operating seamlessly via client-side architecture while awaiting Person 2's backend database integration.
+        </div>
+        
+        <!-- Category Filter Pills -->
+        <div class="d-flex align-center justify-between" style="flex-wrap: wrap; gap: 12px; margin-bottom: var(--space-md);">
+          <div class="filter-pills-wrap" style="margin: 0;">
+            <button type="button" class="filter-pill active" data-category="all">All Destinations</button>
+            <button type="button" class="filter-pill" data-category="hills">&#127956; Hill Stations</button>
+            <button type="button" class="filter-pill" data-category="heritage">&#127963; Heritage & Temples</button>
+            <button type="button" class="filter-pill" data-category="coastal">&#127754; Coastal Escapes</button>
+            <button type="button" class="filter-pill" data-category="nature">&#127795; Nature & Wildlife</button>
+            <button type="button" class="filter-pill" data-category="cultural">&#127827; Culinary & Culture</button>
+          </div>
+
+          <div style="font-size: 0.9rem; color: var(--color-text-muted);">
+            Showing: <strong id="destResultsCount" style="color: var(--color-primary-dark);">12 Destinations</strong>
+          </div>
+        </div>
+
+        <!-- Destination Cards Grid (Hydrated by customer.js with static fallback) -->
+        <div class="grid-3" id="destinationsGrid">
+          <!-- Dynamically populated by YaadhumCustomer.DestinationService -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Travel Inspiration & Heritage Callout -->
+    <section class="section section-alt">
+      <div class="container">
+        
+        <div class="section-header">
+          <span class="section-tagline">Authentic Travel Inspiration</span>
+          <h2 class="section-title">Why Travel Local with YAADHUM OOORE?</h2>
+          <p class="section-desc">
+            Local tourism isn't just about visiting places—it's about learning the folklore, tasting the local harvest, and walking with those who call these destinations home.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          
+          <div class="feature-box">
+            <div class="feature-icon-badge">&#127806;</div>
+            <h3 class="feature-title">Preserving Living Traditions</h3>
+            <p class="feature-desc">
+              Experience century-old bronze sculptors of Swamimalai, Chettinad tile artisans, and Nilgiri Toda tribal embroidery with generational custodians.
+            </p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-icon-badge">&#128652;</div>
+            <h3 class="feature-title">Eco-Friendly Routes</h3>
+            <p class="feature-desc">
+              Explore off-beat forest trails in Valparai and Pollachi with minimum ecological footprint and direct economic benefit to local forest communities.
+            </p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-icon-badge">&#127829;</div>
+            <h3 class="feature-title">Culinary Authenticity</h3>
+            <p class="feature-desc">
+              Taste genuine Madurai Kari Dosai, authentic Chettinad pepper delicacies, and plantation-fresh Shevaroy filter coffees straight from local kitchens.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        
+        <div class="footer-col">
+          <h3 class="footer-brand-title">YAADHUM OOORE</h3>
+          <p class="footer-tagline">"யாதும் ஊரே யாவரும் கேளிர்"</p>
+          <p class="footer-desc">
+            An academic local tourism platform connecting travellers with authentic experiences across Tamil Nadu.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="../index.html" class="footer-link">Home</a></li>
+            <li><a href="destinations.html" class="footer-link">Destinations</a></li>
+            <li><a href="packages.html" class="footer-link">Packages</a></li>
+            <li><a href="search-packages.html" class="footer-link">Search</a></li>
+            <li><a href="compare.html" class="footer-link">Compare Tours</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Customer Access</h4>
+          <ul class="footer-links">
+            <li><a href="login.html" class="footer-link">Sign In</a></li>
+            <li><a href="register.html" class="footer-link">Create Account</a></li>
+            <li><a href="customer-dashboard.html" class="footer-link">Dashboard</a></li>
+            <li><a href="my-bookings.html" class="footer-link">My Bookings</a></li>
+            <li><a href="wishlist.html" class="footer-link">Saved Wishlist</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Platform Portals</h4>
+          <ul class="footer-links">
+            <li><a href="../provider/provider-dashboard.html" class="footer-link">Provider Dashboard</a></li>
+            <li><a href="../admin/admin-dashboard.html" class="footer-link">Admin Dashboard</a></li>
+          </ul>
+          <p style="margin-top: 14px; font-size: 0.8rem; color: #8CA39C;">
+            Web Technology Academic Project &bull; Person 1 Customer Module
+          </p>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 <strong>YAADHUM OOORE</strong>. All rights reserved.
+        </div>
+        <div class="portal-links">
+          <a href="../index.html" class="portal-link">Landing Page</a>
+          <span>&bull;</span>
+          <a href="../provider/provider-dashboard.html" class="portal-link">Provider Portal</a>
+          <span>&bull;</span>
+          <a href="../admin/admin-dashboard.html" class="portal-link">Admin Portal</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Customer Module Vanilla JavaScript -->
+  <script src="js/customer.js"></script>
+
+</body>
+</html>
+

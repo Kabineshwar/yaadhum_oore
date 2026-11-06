@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Register an account with YAADHUM OOORE to explore local tourism packages, reserve seats, and experience the cultural wonders of Tamil Nadu.">
+  <title>Customer Registration | YAADHUM OOORE</title>
+  
+  <!-- Shared Customer Design System -->
+  <link rel="stylesheet" href="css/customer.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container">
+      <span class="tamil-phrase" style="color: var(--color-gold);">"யாதும் ஊரே யாவரும் கேளிர்"</span>
+      &nbsp;&bull;&nbsp; To us all towns are one, all people our kin &nbsp;&bull;&nbsp;
+      <strong>Customer Registration</strong>
+    </div>
+  </div>
+
+  <!-- Primary Header & Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="nav-wrapper">
+        
+        <!-- Brand Logo -->
+        <a href="../index.html" class="brand-logo" aria-label="YAADHUM OOORE Home">
+          <div class="logo-badge">ய</div>
+          <div class="brand-text-group">
+            <span class="brand-title">YAADHUM OOORE</span>
+            <span class="brand-subtitle">Local Tourism Platform</span>
+          </div>
+        </a>
+
+        <!-- Mobile Navigation Toggle -->
+        <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu">
+          &#9776;
+        </button>
+
+        <!-- Main Navigation Links -->
+        <nav class="nav-links" id="mainNav">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="destinations.html" class="nav-link">Destinations</a>
+          <a href="packages.html" class="nav-link">Packages</a>
+          <a href="search-packages.html" class="nav-link">Search</a>
+          <a href="compare.html" class="nav-link">Compare</a>
+          <a href="wishlist.html" class="nav-link">Wishlist</a>
+        </nav>
+
+        <!-- Navigation Actions -->
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-secondary btn-sm">Log In</a>
+          <a href="register.html" class="btn btn-primary btn-sm active" style="font-weight: 700;">Register</a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area: Registration Card -->
+  <main class="auth-page-wrapper">
+    <div class="auth-card auth-card-wide">
+      
+      <!-- Auth Header -->
+      <div class="auth-header">
+        <div class="auth-logo-badge" style="background: var(--color-terracotta);">ய</div>
+        <h1 class="auth-title">Create Your Account</h1>
+        <p class="auth-subtitle">Join YAADHUM OOORE to book local tours and explore Tamil Nadu</p>
+      </div>
+
+      <!-- Top Notification Banner -->
+      <div id="registerAlert" class="alert" role="alert" aria-live="polite"></div>
+
+      <!-- Academic Demonstration Notice -->
+      <div class="alert alert-demo is-visible" style="margin-bottom: 24px;">
+        <strong>Academic Project Notice:</strong> Database-driven customer registration will be connected to the shared MySQL database by Person 2. Client-side input validation and error handling are fully active.
+      </div>
+
+      <!-- Registration Form -->
+      <form id="registerForm" novalidate>
+        
+        <!-- Row 1: Full Name & Email Address -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name" class="form-label">Full Name <span style="color:#C82333;">*</span></label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              class="form-input" 
+              placeholder="e.g. Kaniyan Pungundran" 
+              required 
+              autocomplete="name"
+            >
+            <span id="nameError" class="form-error-msg" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address <span style="color:#C82333;">*</span></label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="form-input" 
+              placeholder="e.g. traveller@example.com" 
+              required 
+              autocomplete="email"
+            >
+            <span id="emailError" class="form-error-msg" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <!-- Row 2: Mobile Number & Password -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone" class="form-label">Mobile Number (India) <span style="color:#C82333;">*</span></label>
+            <input 
+              type="tel" 
+              id="phone" 
+              name="phone" 
+              class="form-input" 
+              placeholder="10-digit number (e.g. 9876543210)" 
+              required 
+              autocomplete="tel"
+            >
+            <span id="phoneError" class="form-error-msg" aria-live="polite"></span>
+            <span class="form-help">Starting with 6, 7, 8, or 9</span>
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">Password <span style="color:#C82333;">*</span></label>
+            <div class="password-input-wrapper">
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                class="form-input" 
+                placeholder="Minimum 8 characters" 
+                required 
+                autocomplete="new-password"
+              >
+              <button 
+                type="button" 
+                class="password-toggle-btn" 
+                data-target="password" 
+                aria-label="Show password"
+              >
+                Show
+              </button>
+            </div>
+            <span id="passwordError" class="form-error-msg" aria-live="polite"></span>
+            <span class="form-help">At least 8 characters</span>
+          </div>
+        </div>
+
+        <!-- Row 3: Confirm Password -->
+        <div class="form-group">
+          <label for="confirmPassword" class="form-label">Confirm Password <span style="color:#C82333;">*</span></label>
+          <div class="password-input-wrapper">
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              name="confirmPassword" 
+              class="form-input" 
+              placeholder="Re-enter password to confirm" 
+              required 
+              autocomplete="new-password"
+            >
+            <button 
+              type="button" 
+              class="password-toggle-btn" 
+              data-target="confirmPassword" 
+              aria-label="Show confirm password"
+            >
+              Show
+            </button>
+          </div>
+          <span id="confirmPasswordError" class="form-error-msg" aria-live="polite"></span>
+        </div>
+
+        <!-- Row 4: Street Address -->
+        <div class="form-group">
+          <label for="address" class="form-label">Residential Address <span style="color:#C82333;">*</span></label>
+          <input 
+            type="text" 
+            id="address" 
+            name="address" 
+            class="form-input" 
+            placeholder="Door No., Street Name, Locality" 
+            required 
+            autocomplete="street-address"
+          >
+          <span id="addressError" class="form-error-msg" aria-live="polite"></span>
+        </div>
+
+        <!-- Row 5: City, State, Pincode -->
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="city" class="form-label">City / Town <span style="color:#C82333;">*</span></label>
+            <input 
+              type="text" 
+              id="city" 
+              name="city" 
+              class="form-input" 
+              placeholder="e.g. Madurai" 
+              required 
+              autocomplete="address-level2"
+            >
+            <span id="cityError" class="form-error-msg" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="state" class="form-label">State <span style="color:#C82333;">*</span></label>
+            <input 
+              type="text" 
+              id="state" 
+              name="state" 
+              class="form-input" 
+              value="Tamil Nadu" 
+              required 
+              autocomplete="address-level1"
+            >
+            <span id="stateError" class="form-error-msg" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="pincode" class="form-label">PIN Code <span style="color:#C82333;">*</span></label>
+            <input 
+              type="text" 
+              id="pincode" 
+              name="pincode" 
+              class="form-input" 
+              placeholder="6-digit PIN (e.g. 625001)" 
+              maxlength="6" 
+              required 
+              autocomplete="postal-code"
+            >
+            <span id="pincodeError" class="form-error-msg" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <!-- Row 6: Terms and Conditions Checkbox -->
+        <div class="form-group">
+          <label class="form-checkbox-group">
+            <input type="checkbox" id="terms" name="terms" required>
+            <span class="form-checkbox-label">
+              I agree to the <a href="#" onclick="alert('YAADHUM OOORE Academic Platform Terms: User data is processed strictly for demonstration of academic web technology concepts.'); return false;" style="color: var(--color-primary); font-weight: 600;">Terms of Service</a> and <a href="#" onclick="alert('YAADHUM OOORE Privacy Policy: We respect passenger privacy and do not distribute personal information.'); return false;" style="color: var(--color-primary); font-weight: 600;">Privacy Policy</a>.
+            </span>
+          </label>
+          <span id="termsError" class="form-error-msg" aria-live="polite"></span>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-terracotta btn-lg" style="width: 100%; margin-top: 10px;">
+          Create Customer Account &rarr;
+        </button>
+
+      </form>
+
+      <!-- Auth Footer Link -->
+      <div class="auth-footer">
+        Already registered with YAADHUM OOORE? 
+        <a href="login.html">Sign In Here</a>
+      </div>
+
+      <!-- Return to Home Link -->
+      <div style="text-align: center; margin-top: 14px;">
+        <a href="../index.html" style="font-size: 0.85rem; color: var(--color-text-light);">
+          &larr; Back to Public Homepage
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        
+        <div class="footer-col">
+          <h3 class="footer-brand-title">YAADHUM OOORE</h3>
+          <p class="footer-tagline">"யாதும் ஊரே யாவரும் கேளிர்"</p>
+          <p class="footer-desc">
+            An academic local tourism platform connecting travellers with authentic experiences across Tamil Nadu.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="../index.html" class="footer-link">Home</a></li>
+            <li><a href="destinations.html" class="footer-link">Destinations</a></li>
+            <li><a href="packages.html" class="footer-link">Packages</a></li>
+            <li><a href="search-packages.html" class="footer-link">Search</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Customer Access</h4>
+          <ul class="footer-links">
+            <li><a href="login.html" class="footer-link">Sign In</a></li>
+            <li><a href="register.html" class="footer-link">Create Account</a></li>
+            <li><a href="customer-dashboard.html" class="footer-link">Dashboard</a></li>
+            <li><a href="my-bookings.html" class="footer-link">My Bookings</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Platform Portals</h4>
+          <ul class="footer-links">
+            <li><a href="../provider/provider-dashboard.html" class="footer-link">Provider Dashboard</a></li>
+            <li><a href="../admin/admin-dashboard.html" class="footer-link">Admin Dashboard</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 <strong>YAADHUM OOORE</strong>. All rights reserved.
+        </div>
+        <div class="portal-links">
+          <a href="../index.html" class="portal-link">Landing Page</a>
+          <span>&bull;</span>
+          <a href="../provider/provider-dashboard.html" class="portal-link">Provider Portal</a>
+          <span>&bull;</span>
+          <a href="../admin/admin-dashboard.html" class="portal-link">Admin Portal</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Customer Module Vanilla JavaScript -->
+  <script src="js/customer.js"></script>
+
+</body>
+</html>
+
