@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Admins - YAADHUM OOORE</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Super Administrator Control Panel</p>
+    </header>
+
+    <nav>
+        <a href="superadmin-dashboard.html">Dashboard</a>
+        <a href="manage-admins.html" class="active">Manage Admins</a>
+        <a href="permissions.html">Permissions</a>
+        <a href="system-logs.html">System Logs</a>
+        <a href="system-settings.html">System Settings</a>
+        <a href="destination-updates.html">Destination Updates</a>
+    </nav>
+
+    <main>
+        <h2>Manage Administrators</h2>
+        <p>View, add and manage administrator accounts.</p>
+
+        <!-- Administrator Statistics -->
+        <section class="admin-management-summary">
+            <div class="stat-card">
+                <h3>Total Admins</h3>
+                <p id="totalAdminsCount">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Active Admins</h3>
+                <p id="activeAdminsCount">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending Approval</h3>
+                <p id="pendingAdminsCount">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Inactive Admins</h3>
+                <p id="inactiveAdminsCount">0</p>
+            </div>
+        </section>
+
+        <!-- Admin Management -->
+        <section class="admin-management-section">
+
+            <div class="admin-management-controls">
+                <input
+                    type="text"
+                    id="searchAdmin"
+                    placeholder="Search by name or email"
+                >
+
+                <select id="adminStatusFilter">
+                    <option value="All">All Statuses</option>
+                    <option value="Active">Active</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+
+                <button type="button" id="addAdminButton">
+                    + Add Administrator
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Admin ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="adminTableBody"></tbody>
+                </table>
+            </div>
+
+            <p id="noAdminsMessage" class="empty-message" hidden>
+                No administrators found.
+            </p>
+
+        </section>
+    </main>
+
+    <!-- Add / Edit Administrator Dialog -->
+    <dialog id="adminDialog" class="admin-dialog">
+        <form id="adminForm">
+
+            <h2 id="adminDialogTitle">Add Administrator</h2>
+
+            <input type="hidden" id="adminId">
+
+            <label for="adminName">Full Name</label>
+            <input type="text" id="adminName" required>
+
+            <label for="adminEmail">Email Address</label>
+            <input type="email" id="adminEmail" required>
+
+            <label for="adminRole">Administrator Role</label>
+            <select id="adminRole" required>
+                <option value="Administrator">Administrator</option>
+                <option value="Booking Manager">Booking Manager</option>
+                <option value="Content Manager">Content Manager</option>
+                <option value="Support Manager">Support Manager</option>
+            </select>
+
+            <div class="dialog-actions">
+                <button type="submit">Save Administrator</button>
+                <button type="button" id="cancelAdminButton">Cancel</button>
+            </div>
+
+        </form>
+    </dialog>
+
+    <script src="js/manage-admins.js"></script>
+
+</body>
+</html>

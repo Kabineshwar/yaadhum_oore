@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permissions - YAADHUM OOORE</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Super Administrator Control Panel</p>
+    </header>
+
+    <nav>
+        <a href="superadmin-dashboard.html">Dashboard</a>
+        <a href="manage-admins.html">Manage Admins</a>
+        <a href="permissions.html" class="active">Permissions</a>
+        <a href="system-logs.html">System Logs</a>
+        <a href="system-settings.html">System Settings</a>
+        <a href="destination-updates.html">Destination Updates</a>
+    </nav>
+
+    <main>
+        <h2>Role Permissions</h2>
+        <p>Control which sections each administrator role can access.</p>
+
+        <section class="permission-info">
+            <h3>About Role-Based Access</h3>
+            <p>
+                Each administrator role has different access permissions.
+                The Super Admin can modify these permissions according
+                to the responsibilities of each role.
+            </p>
+        </section>
+
+        <section class="permission-section">
+
+            <div class="permission-controls">
+                <label for="roleSelect">Select Administrator Role:</label>
+
+                <select id="roleSelect">
+                    <option value="Administrator">Administrator</option>
+                    <option value="Booking Manager">Booking Manager</option>
+                    <option value="Content Manager">Content Manager</option>
+                    <option value="Support Manager">Support Manager</option>
+                </select>
+            </div>
+
+            <h3 id="selectedRoleTitle">Administrator Permissions</h3>
+
+            <div class="table-container">
+                <table class="permission-table">
+                    <thead>
+                        <tr>
+                            <th>Module</th>
+                            <th>View</th>
+                            <th>Add</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="permissionTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="permission-actions">
+                <button type="button" id="savePermissionsButton">
+                    Save Permissions
+                </button>
+
+                <button type="button" id="resetPermissionsButton">
+                    Reset Default
+                </button>
+            </div>
+
+            <p id="permissionMessage" class="permission-message" aria-live="polite"></p>
+
+        </section>
+    </main>
+
+    <script src="js/permissions.js"></script>
+
+</body>
+</html>

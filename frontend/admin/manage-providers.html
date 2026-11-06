@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Manage Providers - YAADHUM OOORE</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Local Tourism Administration Portal</p>
+    </header>
+
+    <nav>
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="manage-customers.html">Customers</a>
+        <a href="manage-providers.html" class="active">Providers</a>
+        <a href="manage-destinations.html">Destinations</a>
+        <a href="manage-categories.html">Categories</a>
+        <a href="manage-packages.html">Packages</a>
+        <a href="manage-bookings.html">Bookings</a>
+        <a href="reports.html">Reports</a>
+    </nav>
+
+    <main>
+
+        <h2>Manage Tourism Providers</h2>
+
+        <p>
+            Review provider registrations and manage their
+            approval status on the YAADHUM OOORE platform.
+        </p>
+
+        <section class="provider-summary">
+
+            <div class="stat-card">
+                <h3>Total Providers</h3>
+                <h2 id="totalProviders">0</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>Approved</h3>
+                <h2 id="approvedProviders">0</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <h2 id="pendingProviders">0</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>Rejected</h3>
+                <h2 id="rejectedProviders">0</h2>
+            </div>
+
+        </section>
+
+        <section class="provider-management">
+
+            <h3>Provider Applications</h3>
+
+            <div class="provider-controls">
+
+                <input
+                    type="text"
+                    id="searchProvider"
+                    placeholder="Search by name or email..."
+                >
+
+                <select id="statusFilter">
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Provider Name</th>
+                            <th>Email</th>
+                            <th>Business</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="providerTableBody">
+                        <!-- Provider records will be added using JavaScript -->
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <p id="emptyMessage" class="empty-message" hidden>
+                No providers found.
+            </p>
+
+        </section>
+
+    </main>
+
+    <!-- Provider Details Dialog -->
+
+    <dialog id="providerDialog">
+
+        <h3>Provider Details</h3>
+
+        <div id="providerDetails"></div>
+
+        <button type="button" id="closeDialog" class="button">
+            Close
+        </button>
+
+    </dialog>
+
+    <footer>
+        <p>YAADHUM OOORE | Explore Your World</p>
+    </footer>
+
+    <script src="js/manage-providers.js"></script>
+
+</body>
+</html>
