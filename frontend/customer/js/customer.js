@@ -328,9 +328,16 @@
         name: userProfile.name,
         email: userProfile.email,
         phone: userProfile.phone || '',
+        dob: userProfile.dob || '',
+        gender: userProfile.gender || '',
+        address: userProfile.address || '',
         city: userProfile.city || '',
+        state: userProfile.state || 'Tamil Nadu',
+        pincode: userProfile.pincode || '',
+        memberSince: userProfile.memberSince || 'March 2026',
+        status: userProfile.status || 'Active',
         role: 'customer',
-        loginTime: new Date().toISOString()
+        loginTime: userProfile.loginTime || new Date().toISOString()
       };
 
       const serialized = JSON.stringify(safeData);
@@ -456,6 +463,133 @@
       }
       this.clearSession();
       window.location.href = 'login.html';
+    },
+
+    /**
+     * Retrieves customer profile information, with graceful defaults if some attributes are absent.
+     * @returns {Object} Complete safe profile object
+     */
+    getProfile() {
+      const user = this.getCurrentUser();
+      if (user) {
+        return {
+          id: user.id || 'CUST-101',
+          name: user.name || 'Valued Traveller',
+          email: user.email || 'customer@yaadhum.local',
+          phone: user.phone || '9876543210',
+          dob: user.dob || '1995-06-15',
+          gender: user.gender || 'Prefer not to say',
+          address: user.address || '42, Heritage Street, Near Temple Gate',
+          city: user.city || 'Madurai',
+          state: user.state || 'Tamil Nadu',
+          pincode: user.pincode || '625001',
+          memberSince: user.memberSince || (user.loginTime ? new Date(user.loginTime).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : 'March 2026'),
+          status: user.status || 'Active',
+          isDemo: Boolean(user.isDemo !== false)
+        };
+      }
+
+      // Default demo profile when inspecting profile without prior login
+      return {
+        id: 'CUST-101',
+        name: 'Anandha Kannan',
+        email: 'customer@yaadhum.local',
+        phone: '9840123456',
+        dob: '1994-08-20',
+        gender: 'Male',
+        address: '15, Sannathi Street, Chidambaram Nagar',
+        city: 'Chennai',
+        state: 'Tamil Nadu',
+        pincode: '600004',
+        memberSince: 'January 2026',
+        status: 'Active',
+        isDemo: true
+      };
+    },
+
+    /**
+     * Update customer profile information.
+     * Attempts live backend PUT /api/customer/profile, with graceful fallback to safe session store.
+     * @param {Object} profileData
+     * @returns {Promise<{success: boolean, data?: any, error?: string, isDemo?: boolean, notice?: string}>}
+     */
+    async updateProfile(profileData) {
+      // 1. Attempt live backend PUT /api/customer/profile
+      try {
+        const res = await apiClient.put('/customer/profile', profileData);
+        if (res && res.success && !res.isDemo) {
+          const isRemembered = Boolean(localStorage.getItem(CONFIG.LOCAL_STORAGE_KEY));
+          this.setSession(res.data, isRemembered);
+          return { success: true, data: res.data, isDemo: false };
+        }
+      } catch (err) {
+        console.info('Backend profile endpoint offline, using demonstration profile engine.');
+      }
+
+      // 2. Demonstration Fallback: update non-sensitive fields in active session/local storage
+      const current = this.getProfile();
+      const updatedUser = {
+        ...current,
+        name: profileData.name,
+        email: profileData.email,
+        phone: profileData.phone,
+        dob: profileData.dob !== undefined ? profileData.dob : current.dob,
+        gender: profileData.gender !== undefined ? profileData.gender : current.gender,
+        address: profileData.address !== undefined ? profileData.address : current.address,
+        city: profileData.city !== undefined ? profileData.city : current.city,
+        state: profileData.state !== undefined ? profileData.state : current.state,
+        pincode: profileData.pincode !== undefined ? profileData.pincode : current.pincode,
+        updatedAt: new Date().toISOString(),
+        isDemo: true
+      };
+
+      const isRemembered = Boolean(localStorage.getItem(CONFIG.LOCAL_STORAGE_KEY));
+      this.setSession(updatedUser, isRemembered);
+
+      return {
+        success: true,
+        data: updatedUser,
+        isDemo: true,
+        notice: 'Profile updated in Academic Demonstration Mode (Client session only). Live MySQL synchronization requires Person 2 backend connectivity.'
+      };
+    },
+
+    /**
+     * Change account password.
+     * Strictly verifies input, attempts live backend endpoint PUT /api/customer/password.
+     * NEVER persists, stores, or simulates passwords client-side.
+     * @param {Object} passwordPayload
+     * @returns {Promise<{success: boolean, error?: string, message?: string, isOffline?: boolean}>}
+     */
+    async changePassword({ currentPassword, newPassword, confirmPassword }) {
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        return { success: false, error: 'All password fields are required.' };
+      }
+      if (newPassword.length < 8) {
+        return { success: false, error: 'New password must be at least 8 characters long.' };
+      }
+      if (newPassword !== confirmPassword) {
+        return { success: false, error: 'New password and confirmation password do not match.' };
+      }
+
+      // Attempt live backend update via Person 2's secure endpoint
+      try {
+        const res = await apiClient.put('/customer/password', { currentPassword, newPassword });
+        if (res && res.success) {
+          return { success: true, message: 'Password updated successfully.', isDemo: false };
+        }
+        if (res && !res.isOffline && res.error) {
+          return { success: false, error: res.error };
+        }
+      } catch (err) {
+        // Backend offline
+      }
+
+      return {
+        success: false,
+        isOffline: true,
+        error: 'Backend Server Offline: Password change requires a secure, live database connection to Person 2’s backend authentication service. For security integrity, password updates cannot be simulated on the client.'
+      };
     }
   };
 
@@ -528,6 +662,16 @@
     // M. Setup My Bookings Page Handler if present
     if (document.getElementById('myBookingsContainer')) {
       setupMyBookingsPage();
+    }
+
+    // N. Setup Profile Page Handler if present
+    if (document.getElementById('profileContainer')) {
+      setupProfilePage();
+    }
+
+    // O. Setup Customer Dashboard Page Handler if present
+    if (document.getElementById('customerDashboardContainer')) {
+      setupCustomerDashboardPage();
     }
   });
 
@@ -3975,6 +4119,977 @@
     // Initial Render
     renderKpiCards();
     renderList();
+  }
+
+  /**
+   * Setup logic for profile.html (Phase 4C: Customer Profile Management).
+   */
+  async function setupProfilePage() {
+    const container = document.getElementById('profileContainer');
+    if (!container) return;
+
+    let profile = CustomerAuth.getProfile();
+    let isEditing = false;
+
+    function getInitials(name) {
+      if (!name || typeof name !== 'string') return 'YO';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    // Render base layout
+    container.innerHTML = `
+      <div style="padding: 30px 0 60px 0;">
+        <div class="container">
+          
+          <!-- Breadcrumb Trail -->
+          <nav class="breadcrumb-trail" aria-label="Breadcrumb" style="margin-bottom: var(--space-lg);">
+            <a href="../index.html">Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">My Profile</span>
+          </nav>
+
+          <!-- Top Notification Toast -->
+          <div id="profileAlertBox" style="display: none; margin-bottom: var(--space-md);" role="alert" aria-live="polite"></div>
+
+          <!-- Section Header -->
+          <div class="section-header" style="text-align: left; margin-bottom: var(--space-xl);">
+            <span class="section-tag">Account Management</span>
+            <h1 style="font-size: 2rem; color: var(--color-primary-dark); margin: 6px 0;">
+              Customer Profile & Account
+            </h1>
+            <p style="color: var(--color-text-muted); margin: 0;">
+              யாதும் ஊரே யாவரும் கேளிர் &bull; View and manage your personal details, contact address, and account security.
+            </p>
+          </div>
+
+          <!-- Profile 2-Column Grid -->
+          <div class="profile-layout">
+            
+            <!-- Left Column: Profile Overview Card -->
+            <aside class="profile-overview-card">
+              <div class="profile-avatar" id="overviewAvatar">
+                ${getInitials(profile.name)}
+              </div>
+              
+              <h2 class="profile-overview-name" id="overviewName">${profile.name}</h2>
+              <div class="profile-overview-email" id="overviewEmail">${profile.email}</div>
+
+              <div class="profile-badges-row">
+                <span class="badge badge-success" id="overviewStatus">&#9679; ${profile.status || 'Active'}</span>
+                <span class="badge badge-primary">Customer</span>
+                ${profile.isDemo ? '<span class="badge badge-warning">Demo Account</span>' : ''}
+              </div>
+
+              <div class="profile-meta-list">
+                <div class="profile-meta-row">
+                  <span class="profile-meta-label">Customer ID</span>
+                  <span class="profile-meta-value" id="overviewCustomerId">${profile.id || 'CUST-101'}</span>
+                </div>
+                <div class="profile-meta-row">
+                  <span class="profile-meta-label">Mobile Number</span>
+                  <span class="profile-meta-value" id="overviewPhone">${profile.phone || 'Not provided'}</span>
+                </div>
+                <div class="profile-meta-row">
+                  <span class="profile-meta-label">City / State</span>
+                  <span class="profile-meta-value" id="overviewLocation">${profile.city ? profile.city + ', ' + (profile.state || 'Tamil Nadu') : 'Tamil Nadu'}</span>
+                </div>
+                <div class="profile-meta-row">
+                  <span class="profile-meta-label">Member Since</span>
+                  <span class="profile-meta-value" id="overviewMemberSince">${profile.memberSince || 'March 2026'}</span>
+                </div>
+              </div>
+
+              <div style="margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 8px;">
+                <a href="my-bookings.html" class="btn btn-secondary btn-sm" style="width: 100%;">
+                  &#128197; My Tour Bookings &rarr;
+                </a>
+                <a href="wishlist.html" class="btn btn-outline btn-sm" style="width: 100%; border: 1px solid var(--color-border);">
+                  &hearts; Saved Wishlist
+                </a>
+              </div>
+            </aside>
+
+            <!-- Right Column: Settings & Forms -->
+            <div class="profile-main-col">
+              
+              <!-- Card 1: Personal & Address Information -->
+              <div class="profile-card" id="profileDetailsCard">
+                <div class="profile-card-header">
+                  <div class="profile-card-title-group">
+                    <h3 class="profile-card-title">Personal & Address Information</h3>
+                    <p class="profile-card-desc">Review your official contact credentials and residential address.</p>
+                  </div>
+                  <button type="button" id="btnToggleEditProfile" class="btn btn-primary btn-sm">
+                    &#9998; Edit Profile
+                  </button>
+                </div>
+
+                <!-- Academic Demonstration Mode Banner -->
+                <div class="alert alert-demo is-visible" style="margin-bottom: var(--space-lg);">
+                  <strong>Academic Demonstration Mode:</strong> Profile updates are verified and maintained in client demonstration storage. Database-backed synchronization will connect with Person 2's backend server.
+                </div>
+
+                <form id="profileDetailsForm" novalidate>
+                  
+                  <!-- Section 1: Personal Info -->
+                  <div class="profile-section-title">Personal Information</div>
+                  
+                  <div class="profile-form-grid">
+                    <div class="form-group">
+                      <label for="profileName" class="form-label">Full Name <span style="color:var(--color-status-cancelled);">*</span></label>
+                      <input 
+                        type="text" 
+                        id="profileName" 
+                        name="name" 
+                        class="form-input is-readonly" 
+                        value="${profile.name}" 
+                        readonly 
+                        required
+                      >
+                      <span id="profileNameError" class="form-error-msg" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="profileEmail" class="form-label">Email Address <span style="color:var(--color-status-cancelled);">*</span></label>
+                      <input 
+                        type="email" 
+                        id="profileEmail" 
+                        name="email" 
+                        class="form-input is-readonly" 
+                        value="${profile.email}" 
+                        readonly 
+                        required
+                      >
+                      <span id="profileEmailError" class="form-error-msg" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="profilePhone" class="form-label">Mobile Number <span style="color:var(--color-status-cancelled);">*</span></label>
+                      <input 
+                        type="tel" 
+                        id="profilePhone" 
+                        name="phone" 
+                        class="form-input is-readonly" 
+                        value="${profile.phone}" 
+                        maxlength="10" 
+                        readonly 
+                        required
+                      >
+                      <span id="profilePhoneError" class="form-error-msg" aria-live="polite"></span>
+                      <span class="form-help">10-digit Indian mobile starting with 6–9</span>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="profileDob" class="form-label">Date of Birth</label>
+                      <input 
+                        type="date" 
+                        id="profileDob" 
+                        name="dob" 
+                        class="form-input is-readonly" 
+                        value="${profile.dob || ''}" 
+                        readonly
+                      >
+                      <span id="profileDobError" class="form-error-msg" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                      <label for="profileGender" class="form-label">Gender</label>
+                      <select id="profileGender" name="gender" class="form-input is-readonly" disabled>
+                        <option value="Prefer not to say" ${profile.gender === 'Prefer not to say' ? 'selected' : ''}>Prefer not to say</option>
+                        <option value="Male" ${profile.gender === 'Male' ? 'selected' : ''}>Male</option>
+                        <option value="Female" ${profile.gender === 'Female' ? 'selected' : ''}>Female</option>
+                        <option value="Other" ${profile.gender === 'Other' ? 'selected' : ''}>Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Section 2: Address Info -->
+                  <div class="profile-section-title">Address Information</div>
+
+                  <div class="form-group" style="margin-bottom: var(--space-md);">
+                    <label for="profileAddress" class="form-label">Street / Residential Address <span style="color:var(--color-status-cancelled);">*</span></label>
+                    <input 
+                      type="text" 
+                      id="profileAddress" 
+                      name="address" 
+                      class="form-input is-readonly" 
+                      value="${profile.address || ''}" 
+                      readonly 
+                      required
+                    >
+                    <span id="profileAddressError" class="form-error-msg" aria-live="polite"></span>
+                  </div>
+
+                  <div class="profile-form-grid">
+                    <div class="form-group">
+                      <label for="profileCity" class="form-label">City / Town <span style="color:var(--color-status-cancelled);">*</span></label>
+                      <input 
+                        type="text" 
+                        id="profileCity" 
+                        name="city" 
+                        class="form-input is-readonly" 
+                        value="${profile.city || ''}" 
+                        readonly 
+                        required
+                      >
+                      <span id="profileCityError" class="form-error-msg" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="profileState" class="form-label">State <span style="color:var(--color-status-cancelled);">*</span></label>
+                      <input 
+                        type="text" 
+                        id="profileState" 
+                        name="state" 
+                        class="form-input is-readonly" 
+                        value="${profile.state || 'Tamil Nadu'}" 
+                        readonly 
+                        required
+                      >
+                      <span id="profileStateError" class="form-error-msg" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                      <label for="profilePincode" class="form-label">PIN Code <span style="color:var(--color-status-cancelled);">*</span></label>
+                      <input 
+                        type="text" 
+                        id="profilePincode" 
+                        name="pincode" 
+                        class="form-input is-readonly" 
+                        value="${profile.pincode || ''}" 
+                        maxlength="6" 
+                        readonly 
+                        required
+                      >
+                      <span id="profilePincodeError" class="form-error-msg" aria-live="polite"></span>
+                      <span class="form-help">6-digit Indian Postal Code</span>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons (Shown when in Edit Mode) -->
+                  <div id="profileFormActions" class="profile-actions-bar" style="display: none;">
+                    <button type="button" id="btnCancelProfileEdit" class="btn btn-secondary">
+                      Cancel
+                    </button>
+                    <button type="submit" id="btnSaveProfileChanges" class="btn btn-terracotta">
+                      Save Changes &rarr;
+                    </button>
+                  </div>
+
+                </form>
+              </div>
+
+              <!-- Card 2: Password Management -->
+              <div class="profile-card" id="passwordManagementCard">
+                <div class="profile-card-header">
+                  <div class="profile-card-title-group">
+                    <h3 class="profile-card-title">Security & Password Management</h3>
+                    <p class="profile-card-desc">Change your account password securely.</p>
+                  </div>
+                </div>
+
+                <div class="security-notice-box">
+                  <strong>Password Security Standards:</strong> New password must contain at least 8 characters. Passwords are never logged or stored in local browser storage, and verification requires a secure live database connection.
+                </div>
+
+                <div id="passwordAlertBox" style="display: none; margin-bottom: var(--space-md);" role="alert" aria-live="polite"></div>
+
+                <form id="changePasswordForm" novalidate>
+                  
+                  <div class="form-group" style="margin-bottom: var(--space-md);">
+                    <label for="currentPassword" class="form-label">Current Password <span style="color:var(--color-status-cancelled);">*</span></label>
+                    <div class="password-input-wrapper">
+                      <input 
+                        type="password" 
+                        id="currentPassword" 
+                        name="currentPassword" 
+                        class="form-input" 
+                        placeholder="Enter current password" 
+                        required 
+                        autocomplete="current-password"
+                      >
+                      <button type="button" class="password-toggle-btn" data-target="currentPassword" aria-label="Show current password">Show</button>
+                    </div>
+                    <span id="currentPasswordError" class="form-error-msg" aria-live="polite"></span>
+                  </div>
+
+                  <div class="profile-form-grid">
+                    <div class="form-group">
+                      <label for="newPassword" class="form-label">New Password <span style="color:var(--color-status-cancelled);">*</span></label>
+                      <div class="password-input-wrapper">
+                        <input 
+                          type="password" 
+                          id="newPassword" 
+                          name="newPassword" 
+                          class="form-input" 
+                          placeholder="Minimum 8 characters" 
+                          required 
+                          autocomplete="new-password"
+                        >
+                        <button type="button" class="password-toggle-btn" data-target="newPassword" aria-label="Show new password">Show</button>
+                      </div>
+                      <span id="newPasswordError" class="form-error-msg" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="confirmNewPassword" class="form-label">Confirm New Password <span style="color:var(--color-status-cancelled);">*</span></label>
+                      <div class="password-input-wrapper">
+                        <input 
+                          type="password" 
+                          id="confirmNewPassword" 
+                          name="confirmNewPassword" 
+                          class="form-input" 
+                          placeholder="Re-enter new password" 
+                          required 
+                          autocomplete="new-password"
+                        >
+                        <button type="button" class="password-toggle-btn" data-target="confirmNewPassword" aria-label="Show confirm new password">Show</button>
+                      </div>
+                      <span id="confirmNewPasswordError" class="form-error-msg" aria-live="polite"></span>
+                    </div>
+                  </div>
+
+                  <div style="margin-top: var(--space-lg); text-align: right;">
+                    <button type="submit" id="btnSubmitChangePassword" class="btn btn-primary">
+                      Update Password &rarr;
+                    </button>
+                  </div>
+
+                </form>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    // Elements & Controllers
+    const editableInputs = [
+      document.getElementById('profileName'),
+      document.getElementById('profileEmail'),
+      document.getElementById('profilePhone'),
+      document.getElementById('profileDob'),
+      document.getElementById('profileAddress'),
+      document.getElementById('profileCity'),
+      document.getElementById('profileState'),
+      document.getElementById('profilePincode')
+    ];
+    const genderSelect = document.getElementById('profileGender');
+    const btnToggleEdit = document.getElementById('btnToggleEditProfile');
+    const actionsBar = document.getElementById('profileFormActions');
+    const btnCancel = document.getElementById('btnCancelProfileEdit');
+    const profileForm = document.getElementById('profileDetailsForm');
+    const profileAlert = document.getElementById('profileAlertBox');
+
+    function showTopToast(msg, type = 'success') {
+      if (!profileAlert) return;
+      profileAlert.className = type === 'success' ? 'alert alert-success is-visible' : 'alert alert-error is-visible';
+      profileAlert.innerHTML = `<span>${msg}</span>`;
+      profileAlert.style.display = 'block';
+      if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      setTimeout(() => {
+        if (profileAlert) profileAlert.style.display = 'none';
+      }, 6000);
+    }
+
+    function setEditMode(enable) {
+      isEditing = enable;
+      editableInputs.forEach(input => {
+        if (input) {
+          input.readOnly = !enable;
+          if (enable) input.classList.remove('is-readonly');
+          else input.classList.add('is-readonly');
+        }
+      });
+      if (genderSelect) {
+        genderSelect.disabled = !enable;
+        if (enable) genderSelect.classList.remove('is-readonly');
+        else genderSelect.classList.add('is-readonly');
+      }
+      if (actionsBar) actionsBar.style.display = enable ? 'flex' : 'none';
+      if (btnToggleEdit) btnToggleEdit.style.display = enable ? 'none' : 'inline-flex';
+      if (enable && editableInputs[0]) editableInputs[0].focus();
+    }
+
+    function restoreOriginalValues() {
+      if (document.getElementById('profileName')) document.getElementById('profileName').value = profile.name || '';
+      if (document.getElementById('profileEmail')) document.getElementById('profileEmail').value = profile.email || '';
+      if (document.getElementById('profilePhone')) document.getElementById('profilePhone').value = profile.phone || '';
+      if (document.getElementById('profileDob')) document.getElementById('profileDob').value = profile.dob || '';
+      if (genderSelect) genderSelect.value = profile.gender || 'Prefer not to say';
+      if (document.getElementById('profileAddress')) document.getElementById('profileAddress').value = profile.address || '';
+      if (document.getElementById('profileCity')) document.getElementById('profileCity').value = profile.city || '';
+      if (document.getElementById('profileState')) document.getElementById('profileState').value = profile.state || 'Tamil Nadu';
+      if (document.getElementById('profilePincode')) document.getElementById('profilePincode').value = profile.pincode || '';
+
+      ['profileName', 'profileEmail', 'profilePhone', 'profileDob', 'profileAddress', 'profileCity', 'profileState', 'profilePincode'].forEach(id => {
+        const err = document.getElementById(id + 'Error');
+        if (err) err.textContent = '';
+        const input = document.getElementById(id);
+        if (input) input.classList.remove('input-error', 'input-success');
+      });
+    }
+
+    if (btnToggleEdit) {
+      btnToggleEdit.addEventListener('click', () => setEditMode(true));
+    }
+
+    if (btnCancel) {
+      btnCancel.addEventListener('click', () => {
+        restoreOriginalValues();
+        setEditMode(false);
+      });
+    }
+
+    // Profile Details Form Submission
+    if (profileForm) {
+      profileForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        let hasError = false;
+
+        function showFieldErr(id, errId, msg) {
+          const input = document.getElementById(id);
+          const err = document.getElementById(errId);
+          if (err) err.textContent = msg;
+          if (input) {
+            input.classList.add('input-error');
+            if (!hasError) input.focus();
+          }
+          hasError = true;
+        }
+
+        function clearFieldErr(id, errId) {
+          const input = document.getElementById(id);
+          const err = document.getElementById(errId);
+          if (err) err.textContent = '';
+          if (input) input.classList.remove('input-error');
+        }
+
+        const nameVal = document.getElementById('profileName').value.trim();
+        const emailVal = document.getElementById('profileEmail').value.trim();
+        const phoneVal = document.getElementById('profilePhone').value.trim();
+        const addressVal = document.getElementById('profileAddress').value.trim();
+        const cityVal = document.getElementById('profileCity').value.trim();
+        const stateVal = document.getElementById('profileState').value.trim();
+        const pincodeVal = document.getElementById('profilePincode').value.trim();
+
+        if (!nameVal || nameVal.length < 2) {
+          showFieldErr('profileName', 'profileNameError', 'Full name is required (at least 2 characters).');
+        } else {
+          clearFieldErr('profileName', 'profileNameError');
+        }
+
+        if (!FormValidator.isRequired(emailVal)) {
+          showFieldErr('profileEmail', 'profileEmailError', 'Email address is required.');
+        } else if (!FormValidator.isValidEmail(emailVal)) {
+          showFieldErr('profileEmail', 'profileEmailError', 'Please enter a valid email address.');
+        } else {
+          clearFieldErr('profileEmail', 'profileEmailError');
+        }
+
+        if (!FormValidator.isRequired(phoneVal)) {
+          showFieldErr('profilePhone', 'profilePhoneError', 'Mobile number is required.');
+        } else if (!FormValidator.isValidIndianPhone(phoneVal)) {
+          showFieldErr('profilePhone', 'profilePhoneError', 'Enter a valid 10-digit Indian mobile number (e.g. 9876543210).');
+        } else {
+          clearFieldErr('profilePhone', 'profilePhoneError');
+        }
+
+        if (!FormValidator.isRequired(addressVal)) {
+          showFieldErr('profileAddress', 'profileAddressError', 'Street address is required.');
+        } else {
+          clearFieldErr('profileAddress', 'profileAddressError');
+        }
+
+        if (!FormValidator.isRequired(cityVal)) {
+          showFieldErr('profileCity', 'profileCityError', 'City is required.');
+        } else {
+          clearFieldErr('profileCity', 'profileCityError');
+        }
+
+        if (!FormValidator.isRequired(stateVal)) {
+          showFieldErr('profileState', 'profileStateError', 'State is required.');
+        } else {
+          clearFieldErr('profileState', 'profileStateError');
+        }
+
+        if (!FormValidator.isRequired(pincodeVal)) {
+          showFieldErr('profilePincode', 'profilePincodeError', 'PIN code is required.');
+        } else if (!FormValidator.isValidPincode(pincodeVal)) {
+          showFieldErr('profilePincode', 'profilePincodeError', 'Enter a valid 6-digit Indian PIN code (e.g. 600001).');
+        } else {
+          clearFieldErr('profilePincode', 'profilePincodeError');
+        }
+
+        if (hasError) return;
+
+        const saveBtn = document.getElementById('btnSaveProfileChanges');
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.textContent = 'Saving Changes...';
+        }
+
+        const payload = {
+          name: nameVal,
+          email: emailVal,
+          phone: phoneVal,
+          dob: document.getElementById('profileDob') ? document.getElementById('profileDob').value : '',
+          gender: genderSelect ? genderSelect.value : 'Prefer not to say',
+          address: addressVal,
+          city: cityVal,
+          state: stateVal,
+          pincode: pincodeVal
+        };
+
+        const res = await CustomerAuth.updateProfile(payload);
+
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Changes \u2192';
+        }
+
+        if (res.success) {
+          profile = res.data;
+          
+          // Update Overview Card display
+          const avatarEl = document.getElementById('overviewAvatar');
+          const nameEl = document.getElementById('overviewName');
+          const emailEl = document.getElementById('overviewEmail');
+          const phoneEl = document.getElementById('overviewPhone');
+          const locEl = document.getElementById('overviewLocation');
+
+          if (avatarEl) avatarEl.textContent = getInitials(profile.name);
+          if (nameEl) nameEl.textContent = profile.name;
+          if (emailEl) emailEl.textContent = profile.email;
+          if (phoneEl) phoneEl.textContent = profile.phone;
+          if (locEl) locEl.textContent = `${profile.city}, ${profile.state || 'Tamil Nadu'}`;
+
+          setEditMode(false);
+          showTopToast(res.notice || 'Profile updated successfully!', 'success');
+        } else {
+          showTopToast(res.error || 'Failed to update profile.', 'error');
+        }
+      });
+    }
+
+    // Password Form Handling
+    const passwordForm = document.getElementById('changePasswordForm');
+    const passwordAlert = document.getElementById('passwordAlertBox');
+    const submitPassBtn = document.getElementById('btnSubmitChangePassword');
+
+    // Init password toggle buttons
+    FormValidator.initPasswordToggles(passwordForm);
+
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        let hasPassErr = false;
+
+        function showPassErr(id, errId, msg) {
+          const input = document.getElementById(id);
+          const err = document.getElementById(errId);
+          if (err) err.textContent = msg;
+          if (input) {
+            input.classList.add('input-error');
+            if (!hasPassErr) input.focus();
+          }
+          hasPassErr = true;
+        }
+
+        function clearPassErr(id, errId) {
+          const input = document.getElementById(id);
+          const err = document.getElementById(errId);
+          if (err) err.textContent = '';
+          if (input) input.classList.remove('input-error');
+        }
+
+        const curPass = document.getElementById('currentPassword').value;
+        const newPass = document.getElementById('newPassword').value;
+        const confPass = document.getElementById('confirmNewPassword').value;
+
+        if (!curPass) {
+          showPassErr('currentPassword', 'currentPasswordError', 'Current password is required.');
+        } else {
+          clearPassErr('currentPassword', 'currentPasswordError');
+        }
+
+        if (!newPass) {
+          showPassErr('newPassword', 'newPasswordError', 'New password is required.');
+        } else if (newPass.length < 8) {
+          showPassErr('newPassword', 'newPasswordError', 'New password must be at least 8 characters long.');
+        } else {
+          clearPassErr('newPassword', 'newPasswordError');
+        }
+
+        if (!confPass) {
+          showPassErr('confirmNewPassword', 'confirmNewPasswordError', 'Please confirm your new password.');
+        } else if (confPass !== newPass) {
+          showPassErr('confirmNewPassword', 'confirmNewPasswordError', 'Passwords do not match. Please verify.');
+        } else {
+          clearPassErr('confirmNewPassword', 'confirmNewPasswordError');
+        }
+
+        if (hasPassErr) return;
+
+        if (submitPassBtn) {
+          submitPassBtn.disabled = true;
+          submitPassBtn.textContent = 'Updating Password...';
+        }
+
+        const res = await CustomerAuth.changePassword({
+          currentPassword: curPass,
+          newPassword: newPass,
+          confirmPassword: confPass
+        });
+
+        if (submitPassBtn) {
+          submitPassBtn.disabled = false;
+          submitPassBtn.textContent = 'Update Password \u2192';
+        }
+
+        // CRITICAL SECURITY RULE: Clear password fields immediately from DOM and memory
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmNewPassword').value = '';
+
+        if (res.success) {
+          if (passwordAlert) {
+            passwordAlert.className = 'alert alert-success is-visible';
+            passwordAlert.textContent = res.message || 'Password updated successfully.';
+            passwordAlert.style.display = 'block';
+          }
+        } else {
+          if (passwordAlert) {
+            passwordAlert.className = 'alert alert-error is-visible';
+            passwordAlert.innerHTML = `<strong>Security Notice:</strong> ${res.error}`;
+            passwordAlert.style.display = 'block';
+          }
+        }
+      });
+    }
+  }
+
+  /**
+   * Setup logic for customer-dashboard.html (Final Customer Frontend Module).
+   */
+  async function setupCustomerDashboardPage() {
+    const container = document.getElementById('customerDashboardContainer');
+    if (!container) return;
+
+    // 1. Session & Profile
+    const profile = CustomerAuth.getProfile();
+    function getInitials(name) {
+      if (!name || typeof name !== 'string') return 'YO';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    const initials = getInitials(profile.name);
+
+    // 2. Bookings & Wishlist Data
+    const bookings = BookingService.getBookings();
+    const stats = BookingService.getBookingStats(bookings);
+    const wishlistIds = WishlistService.getWishlist();
+    const wishlistCount = wishlistIds.length;
+
+    // 3. Nearest Eligible Upcoming Trip (excluding cancelled bookings)
+    const todayStr = new Date().toISOString().split('T')[0];
+    const eligibleUpcoming = bookings.filter(b => {
+      return b.bookingStatus !== 'Cancelled' && (b.bookingStatus === 'Upcoming' || (b.bookingStatus === 'Confirmed' && (!b.travelDate || b.travelDate >= todayStr)));
+    });
+
+    eligibleUpcoming.sort((a, b) => (a.travelDate || '') > (b.travelDate || '') ? 1 : -1);
+    const nearestTrip = eligibleUpcoming[0] || null;
+
+    // 4. Latest 3 Bookings
+    const recentBookings = bookings.slice(0, 3);
+
+    // 5. Wishlist Preview (up to 4 packages)
+    const wishlistPackages = PACKAGES_DATA.filter(pkg => {
+      return wishlistIds.includes(String(pkg.id)) || wishlistIds.includes(Number(pkg.id));
+    }).slice(0, 4);
+
+    // 6. Recommended Destinations (up to 4)
+    const recommendedDests = (DESTINATIONS_DATA || []).slice(0, 4);
+
+    // Render Dashboard
+    container.innerHTML = `
+      <div style="padding: 30px 0 60px 0;">
+        <div class="container">
+          
+          <!-- Breadcrumb Trail -->
+          <nav class="breadcrumb-trail" aria-label="Breadcrumb" style="margin-bottom: var(--space-lg);">
+            <a href="../index.html">Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Customer Dashboard</span>
+          </nav>
+
+          <!-- 1. Welcome Section -->
+          <section class="dashboard-welcome-banner">
+            <div class="welcome-user-info">
+              <div class="welcome-avatar-circle">${initials}</div>
+              <div>
+                <h1 class="welcome-title">Vanakkam, ${profile.name}!</h1>
+                <p class="welcome-subtitle">
+                  "யாதும் ஊரே யாவரும் கேளிர்" &bull; Welcome to your Tamil Nadu travel command centre.
+                </p>
+              </div>
+            </div>
+            <div>
+              <a href="packages.html" class="btn btn-gold btn-md" style="font-weight: 700;">
+                + Explore Packages
+              </a>
+            </div>
+          </section>
+
+          <!-- 2. Statistics Grid (4 Dynamically Calculated Cards) -->
+          <section class="bookings-kpi-grid" style="margin-bottom: var(--space-2xl);">
+            <div class="kpi-card kpi-total">
+              <div class="kpi-info">
+                <span class="kpi-value">${stats.total}</span>
+                <span class="kpi-label">Total Bookings</span>
+              </div>
+              <div class="kpi-icon">&#128197;</div>
+            </div>
+
+            <div class="kpi-card kpi-upcoming">
+              <div class="kpi-info">
+                <span class="kpi-value">${stats.upcoming}</span>
+                <span class="kpi-label">Upcoming Trips</span>
+              </div>
+              <div class="kpi-icon">&#9992;</div>
+            </div>
+
+            <div class="kpi-card kpi-completed">
+              <div class="kpi-info">
+                <span class="kpi-value">${stats.completed}</span>
+                <span class="kpi-label">Completed Trips</span>
+              </div>
+              <div class="kpi-icon">&#10003;</div>
+            </div>
+
+            <div class="kpi-card" style="border-left: 4px solid var(--color-terracotta);">
+              <div class="kpi-info">
+                <span class="kpi-value">${wishlistCount}</span>
+                <span class="kpi-label">Wishlist Saved</span>
+              </div>
+              <div class="kpi-icon" style="color: var(--color-terracotta);">&hearts;</div>
+            </div>
+          </section>
+
+          <!-- 7. Quick Actions -->
+          <section style="margin-bottom: var(--space-2xl);">
+            <div class="dashboard-section-head">
+              <h2 class="dashboard-section-title">Quick Actions</h2>
+            </div>
+            <div class="dashboard-quick-actions-grid">
+              <a href="destinations.html" class="quick-action-card">
+                <span class="quick-action-icon">&#127963;</span>
+                <span class="quick-action-label">Explore Destinations</span>
+              </a>
+              <a href="packages.html" class="quick-action-card">
+                <span class="quick-action-icon">&#127957;</span>
+                <span class="quick-action-label">Browse Packages</span>
+              </a>
+              <a href="search-packages.html" class="quick-action-card">
+                <span class="quick-action-icon">&#128269;</span>
+                <span class="quick-action-label">Search Packages</span>
+              </a>
+              <a href="compare.html" class="quick-action-card">
+                <span class="quick-action-icon">&#9878;</span>
+                <span class="quick-action-label">Compare Packages</span>
+              </a>
+              <a href="my-bookings.html" class="quick-action-card">
+                <span class="quick-action-icon">&#128197;</span>
+                <span class="quick-action-label">My Bookings</span>
+              </a>
+              <a href="wishlist.html" class="quick-action-card">
+                <span class="quick-action-icon">&hearts;</span>
+                <span class="quick-action-label">Wishlist</span>
+              </a>
+              <a href="profile.html" class="quick-action-card">
+                <span class="quick-action-icon">&#128100;</span>
+                <span class="quick-action-label">My Profile</span>
+              </a>
+            </div>
+          </section>
+
+          <!-- 3. Upcoming Trip Section -->
+          <section style="margin-bottom: var(--space-2xl);">
+            <div class="dashboard-section-head">
+              <h2 class="dashboard-section-title">Next Upcoming Departure</h2>
+              ${nearestTrip ? '<a href="my-bookings.html" class="btn btn-secondary btn-sm">All Bookings &rarr;</a>' : ''}
+            </div>
+
+            ${nearestTrip ? `
+              <div class="spotlight-trip-card">
+                <div class="spotlight-media">
+                  <img src="${nearestTrip.packageImage || 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80'}" alt="${nearestTrip.packageTitle}" onerror="this.src='https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80'">
+                </div>
+                <div class="spotlight-content">
+                  <div>
+                    <span class="spotlight-tag">&#9992; Upcoming Departure</span>
+                    <h3 class="spotlight-title">
+                      <a href="package-details.html?id=${nearestTrip.packageId}">${nearestTrip.packageTitle}</a>
+                    </h3>
+                    <div class="spotlight-meta-row">
+                      <span>&#128205; Destination: <strong>${nearestTrip.destination}</strong></span>
+                      <span>&#128197; Date: <strong>${nearestTrip.travelDate}</strong></span>
+                      <span>&#128101; Travellers: <strong>${nearestTrip.travellerCount}</strong></span>
+                      <span>&#128278; Ref: <strong style="font-family: monospace; color: var(--color-terracotta);">${nearestTrip.referenceNumber}</strong></span>
+                    </div>
+                  </div>
+                  <div class="d-flex align-center justify-between" style="flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--color-border); padding-top: var(--space-md); margin-top: var(--space-md);">
+                    <div>
+                      <span style="font-size: 0.8rem; color: var(--color-text-light); text-transform: uppercase;">Amount Paid</span>
+                      <div style="font-size: 1.25rem; font-weight: 800; color: var(--color-primary-dark);">&#8377;${(nearestTrip.grandTotal || 0).toLocaleString('en-IN')}</div>
+                    </div>
+                    <div class="d-flex gap-md">
+                      <a href="package-details.html?id=${nearestTrip.packageId}" class="btn btn-secondary btn-sm">View Tour Details</a>
+                      <a href="my-bookings.html" class="btn btn-primary btn-sm">Manage Reservation &rarr;</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ` : `
+              <div class="empty-state" style="padding: 30px; margin-bottom: var(--space-2xl);">
+                <div class="empty-state-icon">&#9992;</div>
+                <h3 class="empty-state-title" style="font-size: 1.2rem;">No Upcoming Departures</h3>
+                <p class="empty-state-desc" style="max-width: 500px; margin: 0 auto 16px auto;">
+                  You do not have any active upcoming tour departures. Explore our handcrafted destinations across Tamil Nadu to reserve your next trip.
+                </p>
+                <a href="packages.html" class="btn btn-primary btn-sm">Discover Packages &rarr;</a>
+              </div>
+            `}
+          </section>
+
+          <!-- 4. Recent Bookings (Latest 3) -->
+          <section style="margin-bottom: var(--space-2xl);">
+            <div class="dashboard-section-head">
+              <h2 class="dashboard-section-title">Recent Reservations</h2>
+              <a href="my-bookings.html" class="btn btn-secondary btn-sm">View All Bookings &rarr;</a>
+            </div>
+
+            ${recentBookings.length > 0 ? `
+              <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto; box-shadow: var(--shadow-xs);">
+                <table class="booking-summary-table" style="margin: 0; min-width: 600px;">
+                  <thead>
+                    <tr style="background: var(--color-bg-warm); border-bottom: 2px solid var(--color-border);">
+                      <th style="padding: 12px 16px; text-align: left; font-size: 0.82rem; text-transform: uppercase; color: var(--color-text-light);">Reference</th>
+                      <th style="padding: 12px 16px; text-align: left; font-size: 0.82rem; text-transform: uppercase; color: var(--color-text-light);">Package Title</th>
+                      <th style="padding: 12px 16px; text-align: left; font-size: 0.82rem; text-transform: uppercase; color: var(--color-text-light);">Departure Date</th>
+                      <th style="padding: 12px 16px; text-align: left; font-size: 0.82rem; text-transform: uppercase; color: var(--color-text-light);">Status</th>
+                      <th style="padding: 12px 16px; text-align: right; font-size: 0.82rem; text-transform: uppercase; color: var(--color-text-light);">Total Amount</th>
+                      <th style="padding: 12px 16px; text-align: center; font-size: 0.82rem; text-transform: uppercase; color: var(--color-text-light);">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${recentBookings.map(b => {
+                      const isCancelled = b.bookingStatus === 'Cancelled';
+                      const isCompleted = b.bookingStatus === 'Completed' || (b.travelDate && b.travelDate < todayStr);
+                      const badgeClass = isCancelled ? 'badge-warning' : (isCompleted ? 'badge-primary' : 'badge-success');
+                      const statusText = isCancelled ? 'Cancelled' : (isCompleted ? 'Completed' : 'Upcoming');
+
+                      return `
+                        <tr>
+                          <td style="font-family: monospace; font-weight: 700; color: var(--color-terracotta);">${b.referenceNumber}</td>
+                          <td>
+                            <strong><a href="package-details.html?id=${b.packageId}">${b.packageTitle}</a></strong>
+                            <div style="font-size: 0.8rem; color: var(--color-text-muted);">&#128205; ${b.destination}</div>
+                          </td>
+                          <td>${b.travelDate}</td>
+                          <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                          <td style="text-align: right; font-weight: 800; color: var(--color-primary-dark);">&#8377;${(b.grandTotal || 0).toLocaleString('en-IN')}</td>
+                          <td style="text-align: center;">
+                            <a href="my-bookings.html" class="btn btn-secondary btn-sm" style="padding: 4px 10px; font-size: 0.8rem;">Details</a>
+                          </td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            ` : `
+              <div class="empty-state" style="padding: 24px;">
+                <p class="empty-state-desc" style="margin: 0;">No reservations on file yet. Book your first local tour package!</p>
+              </div>
+            `}
+          </section>
+
+          <!-- 5. Wishlist Preview (up to 4 packages) -->
+          <section style="margin-bottom: var(--space-2xl);">
+            <div class="dashboard-section-head">
+              <h2 class="dashboard-section-title">Saved in Wishlist</h2>
+              <a href="wishlist.html" class="btn btn-secondary btn-sm">View Full Wishlist &rarr;</a>
+            </div>
+
+            ${wishlistPackages.length > 0 ? `
+              <div class="grid-4">
+                ${wishlistPackages.map(pkg => `
+                  <article class="package-card" style="box-shadow: var(--shadow-sm);">
+                    <div class="package-media" style="height: 150px;">
+                      <img src="${pkg.image}" alt="${pkg.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80'">
+                      <span class="package-tag">${pkg.categoryName}</span>
+                    </div>
+                    <div class="package-body" style="padding: 14px;">
+                      <h4 class="package-title" style="font-size: 0.95rem; margin-bottom: 4px;">
+                        <a href="package-details.html?id=${pkg.id}">${pkg.title}</a>
+                      </h4>
+                      <div class="package-meta" style="margin-bottom: 8px;">
+                        <span class="package-meta-item">&#128205; ${pkg.destination}</span>
+                        <span class="package-meta-item">&#128197; ${pkg.duration}</span>
+                      </div>
+                      <div class="d-flex align-center justify-between" style="border-top: 1px solid var(--color-border); padding-top: 8px; margin-top: 8px;">
+                        <span style="font-weight: 800; color: var(--color-primary-dark);">&#8377;${pkg.price.toLocaleString('en-IN')}</span>
+                        <a href="package-details.html?id=${pkg.id}" class="btn btn-secondary btn-sm" style="padding: 3px 8px; font-size: 0.78rem;">Details &rarr;</a>
+                      </div>
+                    </div>
+                  </article>
+                `).join('')}
+              </div>
+            ` : `
+              <div class="empty-state" style="padding: 24px;">
+                <p class="empty-state-desc" style="margin: 0 0 12px 0;">You have not saved any packages to your wishlist yet.</p>
+                <a href="packages.html" class="btn btn-primary btn-sm">Explore Tour Packages &rarr;</a>
+              </div>
+            `}
+          </section>
+
+          <!-- 6. Recommended Destinations (up to 4) -->
+          <section>
+            <div class="dashboard-section-head">
+              <h2 class="dashboard-section-title">Recommended Destinations</h2>
+              <a href="destinations.html" class="btn btn-secondary btn-sm">All Destinations &rarr;</a>
+            </div>
+
+            <div class="grid-4">
+              ${recommendedDests.map(d => `
+                <article class="destination-card">
+                  <div class="destination-media" style="height: 140px;">
+                    <img src="${d.image}" alt="${d.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80'">
+                    <span class="destination-badge">${d.category}</span>
+                  </div>
+                  <div class="destination-body" style="padding: 14px;">
+                    <div style="font-size: 0.75rem; color: var(--color-gold-dark); font-weight: 700; font-family: var(--font-serif);">${d.tamilName || ''}</div>
+                    <h3 class="destination-name" style="font-size: 1.05rem; margin-bottom: 4px;">${d.name}</h3>
+                    <p style="font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.4; margin-bottom: 10px;">${d.description.length > 70 ? d.description.substring(0, 70) + '...' : d.description}</p>
+                    <a href="packages.html?dest=${encodeURIComponent(d.name)}" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">View Packages</a>
+                  </div>
+                </article>
+              `).join('')}
+            </div>
+          </section>
+
+        </div>
+      </div>
+    `;
   }
 
   // Export public API
