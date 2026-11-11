@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Provider Profile - YAADHUM OOORE</title>
+<link rel="stylesheet" href="../shared/css/common.css">
 <link rel="stylesheet" href="css/provider.css">
 </head>
 <body>
@@ -13,28 +14,47 @@
 <a href="provider-dashboard.html">Dashboard</a>
 <a href="my-packages.html">My Packages</a>
 <a href="add-package.html">Add Package</a>
-<a href="provider-bookings.html">Bookings</a>
+<a href="package-bookings.html">Bookings</a>
 <a href="package-availability.html">Availability</a>
-<a href="provider-profile.html">Profile</a>
+<a href="provider-profile.html" class="active">Profile</a>
 <a href="provider-reviews.html">Reviews</a>
 <a href="provider-reports.html">Reports</a>
 </nav>
 
 <main>
 
-<h2>My Provider Profile</h2><p>Update your personal and business details.</p>
+<h2>My Provider Profile</h2>
+<p>Update your personal and business credentials. These details are visible to travelers booking your packages.</p>
+
 <form id="profileForm">
-<label for="providerName">Provider Name</label><input id="providerName" required>
-<label for="email">Email Address</label><input type="email" id="email" required>
-<label for="phone">Phone Number</label><input type="tel" id="phone" required>
-<label for="business">Business Name</label><input id="business" required>
-<label for="location">Business Location</label><input id="location" required>
-<label for="description">About Your Business</label><textarea id="description" rows="4"></textarea>
-<button type="submit">Save Profile</button><p id="message" class="message" aria-live="polite"></p>
+  <label for="providerName">Authorized Contact Name *</label>
+  <input id="providerName" required>
+
+  <label for="email">Official Email Address *</label>
+  <input type="email" id="email" required>
+
+  <label for="phone">Phone / WhatsApp Number *</label>
+  <input type="tel" id="phone" required>
+
+  <label for="business">Agency / Business Name *</label>
+  <input id="business" required placeholder="e.g. Mountain Adventures">
+
+  <label for="location">Operating Region / City *</label>
+  <input id="location" required placeholder="e.g. Ooty, Nilgiris, Tamil Nadu">
+
+  <label for="description">About Your Experience & Services</label>
+  <textarea id="description" rows="4" placeholder="Share your experience, licenses, languages spoken, and guiding philosophy..."></textarea>
+
+  <button type="submit">Save Profile Changes</button>
+  <p id="message" class="message" aria-live="polite"></p>
 </form>
 
 </main>
 <footer><p>YAADHUM OOORE | Explore Your World</p></footer>
+
+<script src="../shared/js/api.js"></script>
+<script src="../shared/js/session.js"></script>
+<script src="../shared/js/navbar.js"></script>
 <script src="js/provider.js"></script>
 </body>
 </html>

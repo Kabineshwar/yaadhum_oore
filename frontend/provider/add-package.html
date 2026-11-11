@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Add Package - YAADHUM OOORE</title>
+<link rel="stylesheet" href="../shared/css/common.css">
 <link rel="stylesheet" href="css/provider.css">
 </head>
 <body>
@@ -12,8 +13,8 @@
 <nav>
 <a href="provider-dashboard.html">Dashboard</a>
 <a href="my-packages.html">My Packages</a>
-<a href="add-package.html">Add Package</a>
-<a href="provider-bookings.html">Bookings</a>
+<a href="add-package.html" class="active">Add Package</a>
+<a href="package-bookings.html">Bookings</a>
 <a href="package-availability.html">Availability</a>
 <a href="provider-profile.html">Profile</a>
 <a href="provider-reviews.html">Reviews</a>
@@ -22,24 +23,58 @@
 
 <main>
 
-<h2>Add New Tourism Package</h2><p>Enter the details of the tour you want to offer.</p>
+<h2>Add New Tourism Package</h2>
+<p>List a hand-crafted cultural, hill-station, coastal or pilgrimage experience for travelers.</p>
+
 <form id="packageForm">
-<label for="name">Package Name</label><input id="name" name="name" required maxlength="80" placeholder="Example: Ooty Weekend Trip">
-<label for="destination">Destination</label><input id="destination" name="destination" required placeholder="Example: Ooty">
-<label for="category">Category</label><select id="category" name="category" required><option value="">Select category</option><option>Adventure</option><option>Nature</option><option>Cultural</option><option>Beach</option><option>Pilgrimage</option></select>
-<label for="price">Price Per Person (₹)</label><input type="number" id="price" name="price" min="1" step="0.01" required>
-<label for="duration">Duration</label><input id="duration" name="duration" required placeholder="2 days, 1 night">
-<label for="capacity">Available Seats</label><input type="number" id="capacity" name="capacity" min="1" required>
-<label for="startDate">Start Date</label><input type="date" id="startDate" name="startDate" required>
-<label for="endDate">End Date</label><input type="date" id="endDate" name="endDate" required>
-<label for="description">Package Description</label><textarea id="description" name="description" rows="4" required></textarea>
-<label for="itinerary">Day-wise Itinerary</label><textarea id="itinerary" name="itinerary" rows="5" required placeholder="Day 1: Arrival and sightseeing..."></textarea>
-<button type="submit">Save Package</button><p id="message" class="message" aria-live="polite"></p>
+  <label for="name">Package Name *</label>
+  <input id="name" name="name" required maxlength="80" placeholder="e.g. Ooty Nilgiri Tea Trail & Heritage Train">
+
+  <label for="destination">Destination *</label>
+  <input id="destination" name="destination" required placeholder="e.g. Ooty, Madurai, Kodaikanal, Thanjavur">
+
+  <label for="category">Category *</label>
+  <select id="category" name="category" required>
+    <option value="">Select Category</option>
+    <option value="Hill Stations">Hill Stations</option>
+    <option value="Heritage & Cultural">Heritage & Cultural</option>
+    <option value="Coastal & Beach">Coastal & Beach</option>
+    <option value="Wildlife & Eco">Wildlife & Eco</option>
+    <option value="Pilgrimage & Spiritual">Pilgrimage & Spiritual</option>
+    <option value="Culinary & Village">Culinary & Village</option>
+  </select>
+
+  <label for="price">Price Per Person (₹) *</label>
+  <input type="number" id="price" name="price" min="1" step="1" required placeholder="e.g. 4500">
+
+  <label for="duration">Duration *</label>
+  <input id="duration" name="duration" required placeholder="e.g. 3 Days / 2 Nights">
+
+  <label for="capacity">Available Seat Capacity *</label>
+  <input type="number" id="capacity" name="capacity" min="1" required placeholder="e.g. 15">
+
+  <label for="startDate">Available Start Date *</label>
+  <input type="date" id="startDate" name="startDate" required>
+
+  <label for="endDate">Available End Date *</label>
+  <input type="date" id="endDate" name="endDate" required>
+
+  <label for="description">Detailed Description *</label>
+  <textarea id="description" name="description" rows="4" required placeholder="Describe what makes this experience special, places covered, and unique local highlights..."></textarea>
+
+  <label for="itinerary">Day-wise Itinerary *</label>
+  <textarea id="itinerary" name="itinerary" rows="5" required placeholder="Day 1: Arrival, botanical garden, tea estate walk...&#10;Day 2: Toy train ride to Coonoor and sunset viewpoint...&#10;Day 3: Sunrise hike and departure..."></textarea>
+
+  <button type="submit">Publish Package</button>
+  <p id="message" class="message" aria-live="polite"></p>
 </form>
-<p class="note">This frontend demo saves packages in your browser using local storage. It does not yet save to MySQL.</p>
 
 </main>
 <footer><p>YAADHUM OOORE | Explore Your World</p></footer>
+
+<script src="../shared/js/api.js"></script>
+<script src="../shared/js/session.js"></script>
+<script src="../shared/js/navbar.js"></script>
 <script src="js/provider.js"></script>
 </body>
 </html>

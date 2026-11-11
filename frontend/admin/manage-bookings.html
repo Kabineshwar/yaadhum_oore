@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Bookings - YAADHUM OOORE</title>
+    <link rel="stylesheet" href="../shared/css/common.css">
     <link rel="stylesheet" href="css/admin.css">
 </head>
 
@@ -82,7 +83,9 @@
                             <th>Booking ID</th>
                             <th>Customer</th>
                             <th>Package</th>
+                            <th>Destination</th>
                             <th>Travel Date</th>
+                            <th>Travelers</th>
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -92,7 +95,7 @@
                     <tbody id="bookingTableBody"></tbody>
                 </table>
 
-                <p id="emptyBookingMessage" class="empty-message">
+                <p id="bookingEmptyMessage" class="empty-message" hidden>
                     No bookings found.
                 </p>
 
@@ -118,6 +121,12 @@
     <footer>
         <p>YAADHUM OOORE - Administration Portal</p>
     </footer>
+
+    <script src="../shared/js/api.js"></script>
+
+    <script src="../shared/js/session.js"></script>
+
+    <script src="../shared/js/navbar.js"></script>
 
     <script src="js/manage-bookings.js"></script>
 

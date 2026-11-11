@@ -7,6 +7,7 @@
 
     <title>Manage Providers - YAADHUM OOORE</title>
 
+    <link rel="stylesheet" href="../shared/css/common.css">
     <link rel="stylesheet" href="css/admin.css">
 </head>
 
@@ -73,10 +74,11 @@
                     placeholder="Search by name or email..."
                 >
 
-                <select id="statusFilter">
+                <select id="providerStatusFilter">
                     <option value="All">All Statuses</option>
                     <option value="Pending">Pending</option>
                     <option value="Approved">Approved</option>
+                    <option value="Blocked">Blocked</option>
                     <option value="Rejected">Rejected</option>
                 </select>
 
@@ -90,8 +92,10 @@
                         <tr>
                             <th>ID</th>
                             <th>Provider Name</th>
-                            <th>Email</th>
                             <th>Business</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Location</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -105,7 +109,7 @@
 
             </div>
 
-            <p id="emptyMessage" class="empty-message" hidden>
+            <p id="providerEmptyMessage" class="empty-message" hidden>
                 No providers found.
             </p>
 
@@ -131,7 +135,14 @@
         <p>YAADHUM OOORE | Explore Your World</p>
     </footer>
 
+    <script src="../shared/js/api.js"></script>
+
+    <script src="../shared/js/session.js"></script>
+
+    <script src="../shared/js/navbar.js"></script>
+
     <script src="js/manage-providers.js"></script>
 
 </body>
 </html>
+

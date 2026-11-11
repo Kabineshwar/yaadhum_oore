@@ -1,323 +1,146 @@
-
 // ============================================
 // YAADHUM OOORE - MANAGE PROVIDERS
+// Integrated with Shared State & Real Actions
 // ============================================
 
+const api = window.YaadhumAPI;
+let providers = api ? api.getUsers('provider') : [];
 
-// 1. SAMPLE PROVIDER DATA
-
-let providers = [
-
-    {
-        id: 101,
-        name: "Arun Kumar",
-        email: "arun@gmail.com",
-        business: "Arun Travels",
-        phone: "9876543210",
-        location: "Chennai",
-        status: "Pending"
-    },
-
-    {
-        id: 102,
-        name: "Priya Sharma",
-        email: "priya@gmail.com",
-        business: "Explore Tamil Nadu",
-        phone: "9876501234",
-        location: "Madurai",
-        status: "Approved"
-    },
-
-    {
-        id: 103,
-        name: "Rahul Raj",
-        email: "rahul@gmail.com",
-        business: "Mountain Adventures",
-        phone: "9876512345",
-        location: "Ooty",
-        status: "Pending"
-    },
-
-    {
-        id: 104,
-        name: "Sneha Reddy",
-        email: "sneha@gmail.com",
-        business: "Coastal Holidays",
-        phone: "9876523456",
-        location: "Pondicherry",
-        status: "Rejected"
-    },
-
-    {
-        id: 105,
-        name: "Karthik S",
-        email: "karthik@gmail.com",
-        business: "Heritage Tours",
-        phone: "9876534567",
-        location: "Thanjavur",
-        status: "Approved"
-    }
-
-];
-
-
-// 2. GET HTML ELEMENTS
-
-const tableBody = document.getElementById("providerTableBody");
-
-const searchInput = document.getElementById("searchProvider");
-
-const statusFilter = document.getElementById("statusFilter");
-
-const emptyMessage = document.getElementById("emptyMessage");
-
-
-// 3. DISPLAY PROVIDERS IN THE TABLE
+const providerTableBody = document.getElementById("providerTableBody");
+const searchProvider = document.getElementById("searchProvider");
+const providerStatusFilter = document.getElementById("providerStatusFilter");
+const providerEmptyMessage = document.getElementById("providerEmptyMessage");
 
 function displayProviders() {
+    if (api) providers = api.getUsers('provider');
+    if (!providerTableBody) return;
+    providerTableBody.innerHTML = "";
 
-    // Clear existing table rows
+    const searchText = (searchProvider ? searchProvider.value : "").toLowerCase();
+    const selectedStatus = providerStatusFilter ? providerStatusFilter.value : "All";
 
-    tableBody.innerHTML = "";
+    const filtered = providers.filter(function(item) {
+        const name = (item.name || "").toLowerCase();
+        const biz = (item.business || "").toLowerCase();
+        const email = (item.email || "").toLowerCase();
+        const loc = (item.location || "").toLowerCase();
+        const status = item.status || "Approved";
 
-    // Get search text and selected status
-
-    const searchText = searchInput.value.toLowerCase();
-
-    const selectedStatus = statusFilter.value;
-
-    // Filter provider records
-
-    const filteredProviders = providers.filter(function(provider) {
-
-        const matchesSearch =
-            provider.name.toLowerCase().includes(searchText) ||
-            provider.email.toLowerCase().includes(searchText) ||
-            provider.business.toLowerCase().includes(searchText);
-
-        const matchesStatus =
-            selectedStatus === "All" ||
-            provider.status === selectedStatus;
-
+        const matchesSearch = name.includes(searchText) || biz.includes(searchText) || email.includes(searchText) || loc.includes(searchText);
+        const matchesStatus = selectedStatus === "All" || status === selectedStatus;
         return matchesSearch && matchesStatus;
-
     });
 
+    if (providerEmptyMessage) {
+        providerEmptyMessage.hidden = filtered.length !== 0;
+    }
 
-    // Display a message if no records match
-
-    emptyMessage.hidden = filteredProviders.length !== 0;
-
-
-    // Create a table row for every matching provider
-
-    filteredProviders.forEach(function(provider) {
-
+    filtered.forEach(function(item) {
         const row = document.createElement("tr");
 
-        row.innerHTML = `
-            <td>${provider.id}</td>
-            <td>${provider.name}</td>
-            <td>${provider.email}</td>
-            <td>${provider.business}</td>
-            <td>
-                <span class="status ${provider.status.toLowerCase()}">
-                    ${provider.status}
-                </span>
-            </td>
-            <td>
-                <button class="action-button view-button"
-                    data-action="view"
-                    data-id="${provider.id}">
-                    View
-                </button>
+        const idCell = document.createElement("td");
+        idCell.textContent = item.id;
 
-                ${
-                    provider.status === "Pending"
-                    ? `
-                        <button class="action-button approve-button"
-                            data-action="approve"
-                            data-id="${provider.id}">
-                            Approve
-                        </button>
+        const nameCell = document.createElement("td");
+        nameCell.innerHTML = `<strong>${item.name}</strong><br><small style="color:#718096;">${item.business || ''}</small>`;
 
-                        <button class="action-button reject-button"
-                            data-action="reject"
-                            data-id="${provider.id}">
-                            Reject
-                        </button>
-                    `
-                    : ""
+        const businessCell = document.createElement("td");
+        businessCell.textContent = item.business || "Independent Host";
+
+        const emailCell = document.createElement("td");
+        emailCell.textContent = item.email;
+
+        const phoneCell = document.createElement("td");
+        phoneCell.textContent = item.phone || "N/A";
+
+        const locationCell = document.createElement("td");
+        locationCell.textContent = item.location || "Tamil Nadu";
+
+        const statusCell = document.createElement("td");
+        const status = item.status || "Approved";
+        const statusLabel = document.createElement("span");
+        statusLabel.className = "status " + status.toLowerCase();
+        statusLabel.textContent = status;
+        statusCell.appendChild(statusLabel);
+
+        const actionCell = document.createElement("td");
+        actionCell.style.cssText = "display: flex; gap: 6px; flex-wrap: wrap;";
+
+        if (status === "Pending") {
+            const approveBtn = document.createElement("button");
+            approveBtn.textContent = "Approve";
+            approveBtn.className = "action-button approve-button";
+            approveBtn.onclick = function() {
+                if (api) api.updateUserStatus(item.id, "Approved");
+                displayProviders();
+            };
+            actionCell.appendChild(approveBtn);
+
+            const rejectBtn = document.createElement("button");
+            rejectBtn.textContent = "Reject";
+            rejectBtn.className = "action-button reject-button";
+            rejectBtn.onclick = function() {
+                if (api) api.updateUserStatus(item.id, "Rejected");
+                displayProviders();
+            };
+            actionCell.appendChild(rejectBtn);
+        } else if (status === "Approved") {
+            const blockBtn = document.createElement("button");
+            blockBtn.textContent = "Block";
+            blockBtn.className = "action-button reject-button";
+            blockBtn.onclick = function() {
+                if (confirm(`Block provider ${item.name}?`)) {
+                    if (api) api.updateUserStatus(item.id, "Blocked");
+                    displayProviders();
                 }
-            </td>
-        `;
+            };
+            actionCell.appendChild(blockBtn);
+        } else {
+            const unblockBtn = document.createElement("button");
+            unblockBtn.textContent = "Activate";
+            unblockBtn.className = "action-button approve-button";
+            unblockBtn.onclick = function() {
+                if (api) api.updateUserStatus(item.id, "Approved");
+                displayProviders();
+            };
+            actionCell.appendChild(unblockBtn);
+        }
 
-        tableBody.appendChild(row);
+        row.appendChild(idCell);
+        row.appendChild(nameCell);
+        row.appendChild(businessCell);
+        row.appendChild(emailCell);
+        row.appendChild(phoneCell);
+        row.appendChild(locationCell);
+        row.appendChild(statusCell);
+        row.appendChild(actionCell);
 
+        providerTableBody.appendChild(row);
     });
 
-    updateStatistics();
-
+    updateProviderStatistics();
 }
 
-
-// 4. UPDATE DASHBOARD STATISTICS
-
-function updateStatistics() {
-
+function updateProviderStatistics() {
+    if (api) providers = api.getUsers('provider');
     const total = providers.length;
+    const approved = providers.filter(p => (p.status || "Approved") === "Approved").length;
+    const pending = providers.filter(p => p.status === "Pending").length;
+    const blocked = providers.filter(p => p.status === "Blocked" || p.status === "Rejected").length;
 
-    const approved = providers.filter(function(provider) {
-        return provider.status === "Approved";
-    }).length;
+    const elTotal = document.getElementById("totalProviders");
+    const elApp = document.getElementById("activeProviders") || document.getElementById("approvedProviders");
+    const elPend = document.getElementById("pendingProviders");
+    const elBlock = document.getElementById("inactiveProviders") || document.getElementById("blockedProviders");
 
-    const pending = providers.filter(function(provider) {
-        return provider.status === "Pending";
-    }).length;
-
-    const rejected = providers.filter(function(provider) {
-        return provider.status === "Rejected";
-    }).length;
-
-
-    document.getElementById("totalProviders").textContent = total;
-
-    document.getElementById("approvedProviders").textContent = approved;
-
-    document.getElementById("pendingProviders").textContent = pending;
-
-    document.getElementById("rejectedProviders").textContent = rejected;
-
+    if (elTotal) elTotal.textContent = total;
+    if (elApp) elApp.textContent = approved;
+    if (elPend) elPend.textContent = pending;
+    if (elBlock) elBlock.textContent = blocked;
 }
 
-
-// 5. APPROVE OR REJECT A PROVIDER
-
-function updateProviderStatus(providerId, newStatus) {
-
-    const provider = providers.find(function(item) {
-        return item.id === providerId;
-    });
-
-    if (!provider) {
-        return;
-    }
-
-    const confirmation = confirm(
-        "Are you sure you want to " +
-        newStatus.toLowerCase() +
-        " " + provider.name + "?"
-    );
-
-    if (confirmation) {
-
-        provider.status = newStatus;
-
-        alert(
-            provider.name + " has been " +
-            newStatus.toLowerCase() + "."
-        );
-
-        displayProviders();
-
-    }
-
-}
-
-
-// 6. VIEW PROVIDER DETAILS
-
-function viewProviderDetails(providerId) {
-
-    const provider = providers.find(function(item) {
-        return item.id === providerId;
-    });
-
-    if (!provider) {
-        return;
-    }
-
-    const details = document.getElementById("providerDetails");
-
-    details.innerHTML = `
-        <p><strong>Provider ID:</strong> ${provider.id}</p>
-        <p><strong>Name:</strong> ${provider.name}</p>
-        <p><strong>Email:</strong> ${provider.email}</p>
-        <p><strong>Business:</strong> ${provider.business}</p>
-        <p><strong>Phone:</strong> ${provider.phone}</p>
-        <p><strong>Location:</strong> ${provider.location}</p>
-        <p><strong>Status:</strong> ${provider.status}</p>
-    `;
-
-    document.getElementById("providerDialog").showModal();
-
-}
-
-
-// 7. HANDLE TABLE BUTTON CLICKS
-
-tableBody.addEventListener("click", function(event) {
-
-    const button = event.target.closest("button");
-
-    if (!button) {
-        return;
-    }
-
-    const providerId = Number(button.dataset.id);
-
-    const action = button.dataset.action;
-
-    if (action === "approve") {
-
-        updateProviderStatus(providerId, "Approved");
-
-    }
-    else if (action === "reject") {
-
-        updateProviderStatus(providerId, "Rejected");
-
-    }
-    else if (action === "view") {
-
-        viewProviderDetails(providerId);
-
-    }
-
-});
-
-
-// 8. SEARCH PROVIDERS
-
-searchInput.addEventListener("input", function() {
-
+document.addEventListener("DOMContentLoaded", function () {
+    if (searchProvider) searchProvider.addEventListener("input", displayProviders);
+    if (providerStatusFilter) providerStatusFilter.addEventListener("change", displayProviders);
     displayProviders();
-
-});
-
-
-// 9. FILTER PROVIDERS BY STATUS
-
-statusFilter.addEventListener("change", function() {
-
-    displayProviders();
-
-});
-
-
-// 10. CLOSE PROVIDER DETAILS
-
-document.getElementById("closeDialog").addEventListener("click", function() {
-
-    document.getElementById("providerDialog").close();
-
-});
-
-
-// 11. INITIAL PAGE LOAD
-
-document.addEventListener("DOMContentLoaded", function() {
-
-    displayProviders();
-
 });

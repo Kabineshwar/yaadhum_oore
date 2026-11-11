@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Provider Reviews - YAADHUM OOORE</title>
+<link rel="stylesheet" href="../shared/css/common.css">
 <link rel="stylesheet" href="css/provider.css">
 </head>
 <body>
@@ -13,25 +14,28 @@
 <a href="provider-dashboard.html">Dashboard</a>
 <a href="my-packages.html">My Packages</a>
 <a href="add-package.html">Add Package</a>
-<a href="provider-bookings.html">Bookings</a>
+<a href="package-bookings.html">Bookings</a>
 <a href="package-availability.html">Availability</a>
 <a href="provider-profile.html">Profile</a>
-<a href="provider-reviews.html">Reviews</a>
+<a href="provider-reviews.html" class="active">Reviews</a>
 <a href="provider-reports.html">Reports</a>
 </nav>
 
 <main>
 
-<h2>Customer Reviews</h2><p>Review feedback shared by travellers.</p>
-<section class="cards">
-<div class="card"><h3>Arun Kumar</h3><p><strong>Package:</strong> Ooty Weekend Trip</p><p><strong>Rating:</strong> 5 / 5 ⭐</p><p>Had a wonderful experience. The trip was well organised.</p></div>
-<div class="card"><h3>Priya</h3><p><strong>Package:</strong> Kodaikanal Nature Tour</p><p><strong>Rating:</strong> 4 / 5 ⭐</p><p>Beautiful locations and good arrangements.</p></div>
-<div class="card"><h3>Rahul</h3><p><strong>Package:</strong> Ooty Weekend Trip</p><p><strong>Rating:</strong> 5 / 5 ⭐</p><p>Excellent service and friendly local guide.</p></div>
-</section>
-<p class="note">Sample reviews only. Actual reviews will be loaded from the database.</p>
+<h2>Customer Reviews & Ratings</h2>
+<p>Authentic feedback submitted by travelers who completed tours under your guidance.</p>
+
+<div id="reviewsContainer" class="cards" style="margin-top: 20px;">
+  <!-- Reviews dynamically rendered by provider.js -->
+</div>
 
 </main>
 <footer><p>YAADHUM OOORE | Explore Your World</p></footer>
+
+<script src="../shared/js/api.js"></script>
+<script src="../shared/js/session.js"></script>
+<script src="../shared/js/navbar.js"></script>
 <script src="js/provider.js"></script>
 </body>
 </html>

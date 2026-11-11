@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Package Bookings - YAADHUM OOORE</title>
+<link rel="stylesheet" href="../shared/css/common.css">
+<link rel="stylesheet" href="css/provider.css">
+</head>
+<body>
+<header><h1>YAADHUM OOORE</h1><p>Local Tourism Provider Portal</p></header>
+
+<nav>
+<a href="provider-dashboard.html">Dashboard</a>
+<a href="my-packages.html">My Packages</a>
+<a href="add-package.html">Add Package</a>
+<a href="package-bookings.html" class="active">Bookings</a>
+<a href="package-availability.html">Availability</a>
+<a href="provider-profile.html">Profile</a>
+<a href="provider-reviews.html">Reviews</a>
+<a href="provider-reports.html">Reports</a>
+</nav>
+
+<main>
+
+<h2>Customer Package Bookings</h2>
+<p>Live customer bookings registered for your tourism packages. Review, confirm, or manage tour fulfillment.</p>
+
+<div class="table-responsive">
+<table>
+<thead>
+  <tr>
+    <th>Booking ID</th>
+    <th>Customer</th>
+    <th>Package</th>
+    <th>Travel Date</th>
+    <th>Travelers</th>
+    <th>Total Amount</th>
+    <th>Status</th>
+    <th>Actions</th>
+  </tr>
+</thead>
+<tbody>
+  <!-- Dynamic rows hydrated by provider.js from YaadhumAPI -->
+</tbody>
+</table>
+</div>
+
+<p class="note" style="margin-top: 15px;">
+  Status updates are automatically synchronized with the customer's "My Bookings" dashboard. Confirming will notify the customer.
+</p>
+
+</main>
+<footer><p>YAADHUM OOORE | Explore Your World</p></footer>
+
+<script src="../shared/js/api.js"></script>
+<script src="../shared/js/session.js"></script>
+<script src="../shared/js/navbar.js"></script>
+<script src="js/provider.js"></script>
+</body>
+</html>

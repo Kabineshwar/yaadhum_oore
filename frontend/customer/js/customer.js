@@ -366,6 +366,18 @@
       // Clear previous alerts
       FormValidator.hideAlert('loginAlert');
 
+      // 0. Use shared YaadhumAPI engine
+      if (window.YaadhumAPI) {
+        const apiRes = await window.YaadhumAPI.login(email, password);
+        if (apiRes.success && apiRes.data && apiRes.data.user) {
+          this.setSession(apiRes.data.user, remember);
+          return { success: true, user: apiRes.data.user, isDemo: false };
+        }
+        if (apiRes.error && !apiRes.isOffline) {
+          return { success: false, error: apiRes.error };
+        }
+      }
+
       // 1. Send live request to backend
       const result = await apiClient.post('/auth/login', { email, password });
 
@@ -414,6 +426,18 @@
      */
     async register(regData) {
       FormValidator.hideAlert('registerAlert');
+
+      // 0. Use shared YaadhumAPI engine
+      if (window.YaadhumAPI) {
+        const apiRes = await window.YaadhumAPI.register(regData);
+        if (apiRes.success && apiRes.data && apiRes.data.user) {
+          this.setSession(apiRes.data.user, false);
+          return { success: true, user: apiRes.data.user, isDemo: false };
+        }
+        if (apiRes.error && !apiRes.isOffline) {
+          return { success: false, error: apiRes.error };
+        }
+      }
 
       // 1. Send live request to backend
       const result = await apiClient.post('/auth/register', regData);
@@ -545,6 +569,11 @@
 
       const isRemembered = Boolean(localStorage.getItem(CONFIG.LOCAL_STORAGE_KEY));
       this.setSession(updatedUser, isRemembered);
+
+      // Sync with shared YaadhumAPI engine
+      if (window.YaadhumAPI) {
+        window.YaadhumAPI.updateProfile(updatedUser.id, updatedUser);
+      }
 
       return {
         success: true,
@@ -742,10 +771,18 @@
         }
         FormValidator.showAlert('loginAlert', msg, 'success');
 
-        // Redirect to dashboard or landing page after brief feedback
+        // Role-based redirect according to PDF 2 Section 9
         setTimeout(() => {
-          window.location.href = 'customer-dashboard.html';
-        }, 1200);
+          if (res.user && res.user.role === 'provider') {
+            window.location.href = '../provider/provider-dashboard.html';
+          } else if (res.user && res.user.role === 'admin') {
+            window.location.href = '../admin/admin-dashboard.html';
+          } else if (res.user && res.user.role === 'superadmin') {
+            window.location.href = '../admin/superadmin-dashboard.html';
+          } else {
+            window.location.href = 'customer-dashboard.html';
+          }
+        }, 900);
       } else {
         FormValidator.showAlert('loginAlert', `<strong>Sign In Failed:</strong> ${res.error}`, 'error');
       }
@@ -887,6 +924,11 @@
         submitBtn.innerHTML = 'Creating Account...';
       }
 
+      const roleRadio = form.querySelector('input[name="accountRole"]:checked');
+      const chosenRole = roleRadio ? roleRadio.value : 'customer';
+      const bizInput = document.getElementById('providerBusiness');
+      const regInput = document.getElementById('providerRegion');
+
       const payload = {
         name: nameInput.value.trim(),
         email: emailInput.value.trim(),
@@ -895,18 +937,21 @@
         address: addressInput.value.trim(),
         city: cityInput.value.trim(),
         state: stateInput.value.trim(),
-        pincode: pincodeInput.value.trim()
+        pincode: pincodeInput.value.trim(),
+        role: chosenRole,
+        business: bizInput ? bizInput.value.trim() : '',
+        location: regInput ? regInput.value.trim() : cityInput.value.trim()
       };
 
       const res = await CustomerAuth.register(payload);
 
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Create Customer Account &rarr;';
+        submitBtn.innerHTML = 'Create Account &rarr;';
       }
 
       if (res.success) {
-        let msg = `<strong>Account Created Successfully!</strong> Welcome to YAADHUM OOORE.`;
+        let msg = `<strong>Account Created Successfully!</strong> Welcome to YAADHUM OOORE as a ${chosenRole === 'provider' ? 'Local Provider' : 'Customer'}.`;
         if (res.isDemo) {
           msg += `<br><small style="margin-top:4px; display:inline-block;">${res.notice}</small>`;
         }
@@ -914,8 +959,12 @@
         form.reset();
 
         setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 1800);
+          if (chosenRole === 'provider') {
+            window.location.href = '../provider/provider-dashboard.html';
+          } else {
+            window.location.href = 'customer-dashboard.html';
+          }
+        }, 1200);
       } else {
         FormValidator.showAlert('registerAlert', `<strong>Registration Failed:</strong> ${res.error}`, 'error');
       }
@@ -1387,6 +1436,32 @@
   // --------------------------------------------------------------------------
   const PackageService = {
     async getPackages() {
+      let unified = [];
+      if (window.YaadhumAPI) {
+        unified = window.YaadhumAPI.getPackages({ status: 'Approved' });
+      }
+      if (unified && unified.length > 0) {
+        const mapped = unified.map(u => ({
+          id: u.id,
+          title: u.title || u.name,
+          destination: u.destination,
+          destinationSlug: (u.destination || '').toLowerCase().replace(/\s+/g, '-'),
+          category: (u.category || 'heritage').toLowerCase().includes('hill') ? 'hill-stations' : ((u.category || '').toLowerCase().includes('beach') ? 'coastal' : 'heritage'),
+          categoryName: u.category || 'Heritage & Cultural',
+          price: Number(u.price),
+          duration: u.duration,
+          durationDays: u.duration_days || parseInt(u.duration) || 2,
+          rating: 4.8,
+          reviewCount: 18,
+          availableSeats: u.available_seats !== undefined ? Number(u.available_seats) : Number(u.capacity),
+          totalSeats: Number(u.capacity) || 15,
+          description: u.description || '',
+          itinerary: u.itinerary,
+          image: u.image || 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80',
+          isBestSeller: true
+        }));
+        return mapped;
+      }
       // 1. Try real API
       const result = await apiClient.get('/packages');
       if (result.success && Array.isArray(result.data) && result.data.length > 0) {
@@ -1397,8 +1472,42 @@
     },
 
     getById(id) {
+      if (window.YaadhumAPI) {
+        const found = window.YaadhumAPI.getPackageById(id);
+        if (found) {
+          return {
+            id: found.id,
+            title: found.title || found.name,
+            destination: found.destination,
+            destinationSlug: (found.destination || '').toLowerCase().replace(/\s+/g, '-'),
+            category: (found.category || 'heritage').toLowerCase().includes('hill') ? 'hill-stations' : ((found.category || '').toLowerCase().includes('beach') ? 'coastal' : 'heritage'),
+            categoryName: found.category || 'Heritage & Cultural',
+            price: Number(found.price),
+            duration: found.duration,
+            durationDays: found.duration_days || parseInt(found.duration) || 2,
+            rating: 4.9,
+            reviewCount: 22,
+            availableSeats: found.available_seats !== undefined ? Number(found.available_seats) : Number(found.capacity),
+            totalSeats: Number(found.capacity) || 15,
+            description: found.description || '',
+            image: found.image || 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80',
+            inclusions: found.inclusions ? (Array.isArray(found.inclusions) ? found.inclusions : found.inclusions.split(', ')) : ['Accommodation', 'Certified Guide', 'Breakfast'],
+            exclusions: found.exclusions ? (Array.isArray(found.exclusions) ? found.exclusions : found.exclusions.split(', ')) : ['Personal expenses', 'Transport to start'],
+            itinerary: [
+              { day: 1, title: 'Day 1: Arrival & Exploration', desc: (found.itinerary || found.description || 'Welcome by local guide.').split('\n')[0] },
+              { day: 2, title: 'Day 2: Guided Experience & Heritage', desc: ((found.itinerary || '').split('\n')[1]) || 'Full day guided exploration and local culinary feast.' }
+            ],
+            localGuide: {
+              name: found.provider_name || 'Verified Local Host',
+              role: 'Authorized Tourism Provider',
+              experience: 'Local Resident Guide',
+              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
+            }
+          };
+        }
+      }
       const numId = parseInt(id, 10);
-      const pkg = PACKAGES_DATA.find(p => p.id === numId);
+      const pkg = PACKAGES_DATA.find(p => p.id === numId || String(p.id) === String(id));
       if (!pkg) return null;
 
       const days = pkg.durationDays || 2;
@@ -1816,14 +1925,50 @@
      */
     getBookings() {
       try {
+        let list = [];
         const raw = localStorage.getItem(CONFIG.BOOKINGS_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        const list = Array.isArray(parsed) ? parsed : [];
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) list = parsed;
+        }
+
+        // Merge with shared YaadhumAPI bookings
+        if (window.YaadhumAPI) {
+          const user = window.YaadhumSession ? window.YaadhumSession.getUser() : null;
+          const unified = window.YaadhumAPI.getBookings(user && user.role === 'customer' ? { customerId: user.id } : {});
+          unified.forEach(u => {
+            if (!list.some(item => String(item.id) === String(u.booking_id) || String(item.referenceNumber) === String(u.booking_id))) {
+              list.push({
+                id: u.booking_id,
+                referenceNumber: u.booking_id,
+                packageId: u.package_id,
+                packageTitle: u.package_name,
+                destination: 'Tamil Nadu',
+                travelDate: u.travel_date,
+                travellerCount: u.travelers,
+                pricePerPerson: Math.round(Number(u.total_amount) / (Number(u.travelers) || 1)),
+                grandTotal: Number(u.total_amount),
+                bookingStatus: u.booking_status,
+                paymentStatus: u.payment_status || 'Paid',
+                customerName: u.customer_name,
+                customerEmail: u.customer_email || 'customer@yaadhum.local',
+                customerPhone: u.customer_phone || '9876543210',
+                createdAt: u.booked_at
+              });
+            }
+          });
+        }
+
         return list.map(b => {
           if (!b.packageImage && b.packageId) {
-            const pkg = PACKAGES_DATA.find(p => String(p.id) === String(b.packageId));
-            if (pkg) b.packageImage = pkg.image;
+            if (window.YaadhumAPI) {
+              const p = window.YaadhumAPI.getPackageById(b.packageId);
+              if (p) b.packageImage = p.image;
+            }
+            if (!b.packageImage) {
+              const pkg = PACKAGES_DATA.find(p => String(p.id) === String(b.packageId));
+              if (pkg) b.packageImage = pkg.image;
+            }
           }
           return b;
         });
@@ -1912,6 +2057,11 @@
       rawList[targetIndex].paymentStatus = 'Cancelled (Demo)';
 
       localStorage.setItem(CONFIG.BOOKINGS_KEY, JSON.stringify(rawList));
+
+      // Synchronize with shared YaadhumAPI engine to restore package seats and update provider & admin views!
+      if (window.YaadhumAPI) {
+        window.YaadhumAPI.cancelBooking(strId, rawList[targetIndex].customerName || 'Customer');
+      }
 
       return {
         success: true,
@@ -2022,9 +2172,24 @@
      */
     saveBooking(bookingData) {
       try {
-        const bookings = this.getBookings();
+        const raw = localStorage.getItem(CONFIG.BOOKINGS_KEY);
+        let bookings = [];
+        if (raw) {
+          try { bookings = JSON.parse(raw) || []; } catch(e) { bookings = []; }
+        }
         bookings.unshift(bookingData); // Newest first
         localStorage.setItem(CONFIG.BOOKINGS_KEY, JSON.stringify(bookings));
+
+        // Also synchronize to shared state so Provider and Admin immediately see it
+        if (window.YaadhumAPI) {
+          window.YaadhumAPI.createBooking({
+            package_id: bookingData.packageId,
+            travelers: bookingData.travellerCount,
+            travel_date: bookingData.travelDate,
+            payment_method: bookingData.paymentMethod
+          }, window.YaadhumSession ? window.YaadhumSession.getUser() : null);
+        }
+
         return bookingData;
       } catch (e) {
         console.warn('Failed to save booking to localStorage:', e);

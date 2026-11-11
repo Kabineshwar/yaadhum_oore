@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Register an account with YAADHUM OOORE to explore local tourism packages, reserve seats, and experience the cultural wonders of Tamil Nadu.">
-  <title>Customer Registration | YAADHUM OOORE</title>
+  <meta name="description" content="Register an account with YAADHUM OOORE as a Customer or Local Tourism Provider to explore or offer authentic Tamil Nadu tours.">
+  <title>Register | YAADHUM OOORE</title>
   
-  <!-- Shared Customer Design System -->
+  <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="../shared/css/responsive.css">
   <link rel="stylesheet" href="css/customer.css">
 </head>
 <body>
@@ -14,9 +15,9 @@
   <!-- Top Announcement Bar -->
   <div class="announcement-bar">
     <div class="container">
-      <span class="tamil-phrase" style="color: var(--color-gold);">"யாதும் ஊரே யாவரும் கேளிர்"</span>
+      <span class="tamil-phrase">"யாதும் ஊரே யாவரும் கேளிர்"</span>
       &nbsp;&bull;&nbsp; To us all towns are one, all people our kin &nbsp;&bull;&nbsp;
-      <strong>Customer Registration</strong>
+      <strong>Account Registration</strong>
     </div>
   </div>
 
@@ -61,26 +62,42 @@
 
   <!-- Main Content Area: Registration Card -->
   <main class="auth-page-wrapper">
-    <div class="auth-card auth-card-wide">
+    <div class="auth-card auth-card-wide" style="max-width: 680px;">
       
       <!-- Auth Header -->
       <div class="auth-header">
         <div class="auth-logo-badge" style="background: var(--color-terracotta);">ய</div>
         <h1 class="auth-title">Create Your Account</h1>
-        <p class="auth-subtitle">Join YAADHUM OOORE to book local tours and explore Tamil Nadu</p>
+        <p class="auth-subtitle">Join YAADHUM OOORE as a Customer or Local Tourism Provider</p>
       </div>
 
       <!-- Top Notification Banner -->
       <div id="registerAlert" class="alert" role="alert" aria-live="polite"></div>
 
-      <!-- Academic Demonstration Notice -->
-      <div class="alert alert-demo is-visible" style="margin-bottom: 24px;">
-        <strong>Academic Project Notice:</strong> Database-driven customer registration will be connected to the shared MySQL database by Person 2. Client-side input validation and error handling are fully active.
-      </div>
-
       <!-- Registration Form -->
       <form id="registerForm" novalidate>
         
+        <!-- Account Role Selector -->
+        <div class="form-group" style="background: #F7FAFC; padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--color-border); margin-bottom: 24px;">
+          <label class="form-label" style="font-size: 14px; margin-bottom: 10px;">Select Account Role *</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: #FFF;">
+              <input type="radio" name="accountRole" value="customer" checked onchange="toggleProviderFields(false)">
+              <div>
+                <strong>👤 Customer / Tourist</strong>
+                <div style="font-size: 11px; color: var(--color-text-muted);">Explore and book local packages</div>
+              </div>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: #FFF;">
+              <input type="radio" name="accountRole" value="provider" onchange="toggleProviderFields(true)">
+              <div>
+                <strong>🏕️ Local Tour Provider</strong>
+                <div style="font-size: 11px; color: var(--color-text-muted);">Create and host tour packages</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <!-- Row 1: Full Name & Email Address -->
         <div class="form-row">
           <div class="form-group">
@@ -104,11 +121,25 @@
               id="email" 
               name="email" 
               class="form-input" 
-              placeholder="e.g. traveller@example.com" 
+              placeholder="e.g. user@yaadhum.local" 
               required 
               autocomplete="email"
             >
             <span id="emailError" class="form-error-msg" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <!-- Provider Specific Fields (Toggled when provider role is selected) -->
+        <div id="providerExtraFields" style="display: none; background: #FFFDF5; padding: 14px; border: 1px solid #ECC94B; border-radius: var(--radius-md); margin-bottom: 20px;">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="providerBusiness" class="form-label">Agency / Business Name <span style="color:#C82333;">*</span></label>
+              <input type="text" id="providerBusiness" name="providerBusiness" class="form-input" placeholder="e.g. Mountain Adventures">
+            </div>
+            <div class="form-group">
+              <label for="providerRegion" class="form-label">Operating City / Region <span style="color:#C82333;">*</span></label>
+              <input type="text" id="providerRegion" name="providerRegion" class="form-input" placeholder="e.g. Ooty, Nilgiris">
+            </div>
           </div>
         </div>
 
@@ -126,7 +157,6 @@
               autocomplete="tel"
             >
             <span id="phoneError" class="form-error-msg" aria-live="polite"></span>
-            <span class="form-help">Starting with 6, 7, 8, or 9</span>
           </div>
 
           <div class="form-group">
@@ -151,7 +181,6 @@
               </button>
             </div>
             <span id="passwordError" class="form-error-msg" aria-live="polite"></span>
-            <span class="form-help">At least 8 characters</span>
           </div>
         </div>
 
@@ -182,7 +211,7 @@
 
         <!-- Row 4: Street Address -->
         <div class="form-group">
-          <label for="address" class="form-label">Residential Address <span style="color:#C82333;">*</span></label>
+          <label for="address" class="form-label">Address <span style="color:#C82333;">*</span></label>
           <input 
             type="text" 
             id="address" 
@@ -213,15 +242,13 @@
 
           <div class="form-group">
             <label for="state" class="form-label">State <span style="color:#C82333;">*</span></label>
-            <input 
-              type="text" 
-              id="state" 
-              name="state" 
-              class="form-input" 
-              value="Tamil Nadu" 
-              required 
-              autocomplete="address-level1"
-            >
+            <select id="state" name="state" class="form-select" required>
+              <option value="Tamil Nadu" selected>Tamil Nadu</option>
+              <option value="Puducherry">Puducherry</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+            </select>
             <span id="stateError" class="form-error-msg" aria-live="polite"></span>
           </div>
 
@@ -232,7 +259,7 @@
               id="pincode" 
               name="pincode" 
               class="form-input" 
-              placeholder="6-digit PIN (e.g. 625001)" 
+              placeholder="e.g. 625001" 
               maxlength="6" 
               required 
               autocomplete="postal-code"
@@ -241,28 +268,28 @@
           </div>
         </div>
 
-        <!-- Row 6: Terms and Conditions Checkbox -->
-        <div class="form-group">
+        <!-- Terms and Conditions Checkbox -->
+        <div class="form-group" style="margin-top: 10px;">
           <label class="form-checkbox-group">
-            <input type="checkbox" id="terms" name="terms" required>
+            <input type="checkbox" id="terms" name="terms" required checked>
             <span class="form-checkbox-label">
-              I agree to the <a href="#" onclick="alert('YAADHUM OOORE Academic Platform Terms: User data is processed strictly for demonstration of academic web technology concepts.'); return false;" style="color: var(--color-primary); font-weight: 600;">Terms of Service</a> and <a href="#" onclick="alert('YAADHUM OOORE Privacy Policy: We respect passenger privacy and do not distribute personal information.'); return false;" style="color: var(--color-primary); font-weight: 600;">Privacy Policy</a>.
+              I agree to the <a href="#" onclick="alert('YAADHUM OOORE Academic Terms: I understand that this platform is dedicated to responsible local tourism in Tamil Nadu.'); return false;">Terms of Service</a> and Privacy Policy.
             </span>
           </label>
           <span id="termsError" class="form-error-msg" aria-live="polite"></span>
         </div>
 
         <!-- Submit Button -->
-        <button type="submit" class="btn btn-terracotta btn-lg" style="width: 100%; margin-top: 10px;">
-          Create Customer Account &rarr;
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 15px;">
+          Create Account &rarr;
         </button>
 
       </form>
 
       <!-- Auth Footer Link -->
       <div class="auth-footer">
-        Already registered with YAADHUM OOORE? 
-        <a href="login.html">Sign In Here</a>
+        Already have an account? 
+        <a href="login.html">Sign In</a>
       </div>
 
       <!-- Return to Home Link -->
@@ -278,64 +305,21 @@
   <!-- Site Footer -->
   <footer class="site-footer">
     <div class="container">
-      <div class="footer-grid">
-        
-        <div class="footer-col">
-          <h3 class="footer-brand-title">YAADHUM OOORE</h3>
-          <p class="footer-tagline">"யாதும் ஊரே யாவரும் கேளிர்"</p>
-          <p class="footer-desc">
-            An academic local tourism platform connecting travellers with authentic experiences across Tamil Nadu.
-          </p>
-        </div>
-
-        <div class="footer-col">
-          <h4 class="footer-col-title">Quick Links</h4>
-          <ul class="footer-links">
-            <li><a href="../index.html" class="footer-link">Home</a></li>
-            <li><a href="destinations.html" class="footer-link">Destinations</a></li>
-            <li><a href="packages.html" class="footer-link">Packages</a></li>
-            <li><a href="search-packages.html" class="footer-link">Search</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4 class="footer-col-title">Customer Access</h4>
-          <ul class="footer-links">
-            <li><a href="login.html" class="footer-link">Sign In</a></li>
-            <li><a href="register.html" class="footer-link">Create Account</a></li>
-            <li><a href="customer-dashboard.html" class="footer-link">Dashboard</a></li>
-            <li><a href="my-bookings.html" class="footer-link">My Bookings</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4 class="footer-col-title">Platform Portals</h4>
-          <ul class="footer-links">
-            <li><a href="../provider/provider-dashboard.html" class="footer-link">Provider Dashboard</a></li>
-            <li><a href="../admin/admin-dashboard.html" class="footer-link">Admin Dashboard</a></li>
-          </ul>
-        </div>
-
-      </div>
-
-      <div class="footer-bottom">
-        <div>
-          &copy; 2026 <strong>YAADHUM OOORE</strong>. All rights reserved.
-        </div>
-        <div class="portal-links">
-          <a href="../index.html" class="portal-link">Landing Page</a>
-          <span>&bull;</span>
-          <a href="../provider/provider-dashboard.html" class="portal-link">Provider Portal</a>
-          <span>&bull;</span>
-          <a href="../admin/admin-dashboard.html" class="portal-link">Admin Portal</a>
-        </div>
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        &copy; 2026 YAADHUM OOORE &bull; Local Tourism Platform
       </div>
     </div>
   </footer>
 
-  <!-- Customer Module Vanilla JavaScript -->
+  <script src="../shared/js/api.js"></script>
+  <script src="../shared/js/session.js"></script>
+  <script src="../shared/js/navbar.js"></script>
   <script src="js/customer.js"></script>
-
+  <script>
+    function toggleProviderFields(isProvider) {
+      const box = document.getElementById('providerExtraFields');
+      if (box) box.style.display = isProvider ? 'block' : 'none';
+    }
+  </script>
 </body>
 </html>
-

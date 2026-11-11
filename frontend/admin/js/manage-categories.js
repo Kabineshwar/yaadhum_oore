@@ -1,341 +1,128 @@
-// Sample category data
+// ============================================
+// YAADHUM OOORE - MANAGE CATEGORIES
+// Integrated with Shared State & Real Actions
+// ============================================
 
-let categories = [
-
-    {
-        id: 501,
-        name: "Hill Station",
-        description: "Tourism packages involving hills, mountains and cool climates.",
-        status: "Active"
-    },
-
-    {
-        id: 502,
-        name: "Beach",
-        description: "Destinations featuring beaches and coastal activities.",
-        status: "Active"
-    },
-
-    {
-        id: 503,
-        name: "Heritage",
-        description: "Historical monuments, temples and cultural destinations.",
-        status: "Active"
-    },
-
-    {
-        id: 504,
-        name: "Adventure",
-        description: "Trekking, camping and other adventure activities.",
-        status: "Active"
-    },
-
-    {
-        id: 505,
-        name: "Nature",
-        description: "Nature tourism involving forests, lakes and waterfalls.",
-        status: "Active"
-    }
-
-];
-
-
-// Get HTML elements
+const api = window.YaadhumAPI;
+let categories = api ? api.getCategories() : [];
 
 const categoryTableBody = document.getElementById("categoryTableBody");
-
 const searchCategory = document.getElementById("searchCategory");
-
-const categoryDialog = document.getElementById("categoryDialog");
-
+const categoryStatusFilter = document.getElementById("categoryStatusFilter");
+const categoryEmptyMessage = document.getElementById("categoryEmptyMessage");
 const categoryForm = document.getElementById("categoryForm");
 
-
-// Display categories
-
 function displayCategories() {
+    if (api) categories = api.getCategories();
+    if (!categoryTableBody) return;
+    categoryTableBody.innerHTML = "";
 
-    categoryTableBody.textContent = "";
+    const searchText = (searchCategory ? searchCategory.value : "").toLowerCase();
+    const selectedStatus = categoryStatusFilter ? categoryStatusFilter.value : "All";
 
-    const searchValue = searchCategory.value.toLowerCase();
-
-    const filteredCategories = categories.filter(function(category) {
-
-        return (
-            category.name.toLowerCase().includes(searchValue) ||
-            category.description.toLowerCase().includes(searchValue)
-        );
-
+    const filtered = categories.filter(function(item) {
+        const name = (item.name || "").toLowerCase();
+        const status = item.status || "Active";
+        const matchesSearch = name.includes(searchText);
+        const matchesStatus = selectedStatus === "All" || status === selectedStatus;
+        return matchesSearch && matchesStatus;
     });
 
+    if (categoryEmptyMessage) {
+        categoryEmptyMessage.hidden = filtered.length !== 0;
+    }
 
-    filteredCategories.forEach(function(category) {
-
+    filtered.forEach(function(item) {
         const row = document.createElement("tr");
 
-        // ID
         const idCell = document.createElement("td");
-        idCell.textContent = category.id;
+        idCell.textContent = item.id;
 
-        // Category name
         const nameCell = document.createElement("td");
-        nameCell.textContent = category.name;
+        nameCell.textContent = item.name;
 
-        // Description
-        const descriptionCell = document.createElement("td");
-        descriptionCell.textContent = category.description;
+        const descCell = document.createElement("td");
+        descCell.textContent = item.description || "N/A";
 
-        // Status
         const statusCell = document.createElement("td");
-        statusCell.textContent = category.status;
-        statusCell.className = "status approved";
+        const status = item.status || "Active";
+        const statusLabel = document.createElement("span");
+        statusLabel.className = "status " + status.toLowerCase();
+        statusLabel.textContent = status;
+        statusCell.appendChild(statusLabel);
 
-        // Action buttons
         const actionCell = document.createElement("td");
+        actionCell.style.cssText = "display: flex; gap: 6px;";
 
-        const editButton = document.createElement("button");
-        editButton.textContent = "Edit";
-        editButton.className = "view-button";
-        editButton.dataset.action = "edit";
-        editButton.dataset.id = category.id;
+        const toggleBtn = document.createElement("button");
+        toggleBtn.textContent = status === "Active" ? "Deactivate" : "Activate";
+        toggleBtn.className = "action-button " + (status === "Active" ? "reject-button" : "approve-button");
+        toggleBtn.onclick = function() {
+            item.status = status === "Active" ? "Inactive" : "Active";
+            if (api) api.saveCategory(item);
+            displayCategories();
+        };
+        actionCell.appendChild(toggleBtn);
 
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.className = "reject-button";
-        deleteButton.dataset.action = "delete";
-        deleteButton.dataset.id = category.id;
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "action-button reject-button";
+        deleteBtn.onclick = function() {
+            if (confirm(`Delete category ${item.name}?`)) {
+                if (api) api.deleteCategory(item.id);
+                displayCategories();
+            }
+        };
+        actionCell.appendChild(deleteBtn);
 
-        actionCell.appendChild(editButton);
-        actionCell.appendChild(deleteButton);
-
-        // Add cells to row
         row.appendChild(idCell);
         row.appendChild(nameCell);
-        row.appendChild(descriptionCell);
+        row.appendChild(descCell);
         row.appendChild(statusCell);
         row.appendChild(actionCell);
 
         categoryTableBody.appendChild(row);
-
     });
-
-
-    document.getElementById("emptyCategoryMessage").style.display =
-        filteredCategories.length === 0 ? "block" : "none";
 
     updateCategoryStatistics();
-
 }
-
-
-// Update statistics
 
 function updateCategoryStatistics() {
+    if (api) categories = api.getCategories();
+    const total = categories.length;
+    const active = categories.filter(c => (c.status || "Active") === "Active").length;
+    const inactive = categories.filter(c => c.status === "Inactive").length;
 
-    document.getElementById("totalCategories").textContent =
-        categories.length;
+    const elTotal = document.getElementById("totalCategories");
+    const elAct = document.getElementById("activeCategories");
+    const elInact = document.getElementById("inactiveCategories");
 
-    const activeCount = categories.filter(function(category) {
-        return category.status === "Active";
-    }).length;
-
-    document.getElementById("activeCategories").textContent =
-        activeCount;
-
+    if (elTotal) elTotal.textContent = total;
+    if (elAct) elAct.textContent = active;
+    if (elInact) elInact.textContent = inactive;
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    if (searchCategory) searchCategory.addEventListener("input", displayCategories);
+    if (categoryStatusFilter) categoryStatusFilter.addEventListener("change", displayCategories);
 
-// Open dialog to add category
+    if (categoryForm) {
+        categoryForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const name = document.getElementById("categoryName").value.trim();
+            const desc = document.getElementById("categoryDescription").value.trim();
 
-function openAddCategoryDialog() {
-
-    categoryForm.reset();
-
-    document.getElementById("categoryId").value = "";
-
-    document.getElementById("categoryDialogTitle").textContent =
-        "Add Category";
-
-    document.getElementById("saveCategoryButton").textContent =
-        "Save Category";
-
-    categoryDialog.showModal();
-
-}
-
-
-// Open dialog to edit category
-
-function editCategory(id) {
-
-    const category = categories.find(function(item) {
-        return item.id === id;
-    });
-
-    if (!category) {
-        return;
-    }
-
-    document.getElementById("categoryId").value = category.id;
-
-    document.getElementById("categoryName").value = category.name;
-
-    document.getElementById("categoryDescription").value =
-        category.description;
-
-    document.getElementById("categoryDialogTitle").textContent =
-        "Edit Category";
-
-    document.getElementById("saveCategoryButton").textContent =
-        "Update Category";
-
-    categoryDialog.showModal();
-
-}
-
-
-// Save new category or update existing category
-
-function saveCategory(event) {
-
-    event.preventDefault();
-
-    const id = document.getElementById("categoryId").value;
-
-    const name = document.getElementById("categoryName").value.trim();
-
-    const description =
-        document.getElementById("categoryDescription").value.trim();
-
-
-    // Prevent duplicate category names
-
-    const duplicate = categories.some(function(category) {
-
-        return (
-            category.name.toLowerCase() === name.toLowerCase() &&
-            category.id !== Number(id)
-        );
-
-    });
-
-    if (duplicate) {
-        alert("This category already exists.");
-        return;
-    }
-
-
-    if (id === "") {
-
-        // Add new category
-
-        const newCategory = {
-            id: Date.now(),
-            name: name,
-            description: description,
-            status: "Active"
-        };
-
-        categories.push(newCategory);
-
-        alert("Category added successfully!");
-
-    } else {
-
-        // Update existing category
-
-        const category = categories.find(function(item) {
-            return item.id === Number(id);
+            if (name && api) {
+                api.saveCategory({
+                    name: name,
+                    description: desc,
+                    status: "Active"
+                });
+                categoryForm.reset();
+                displayCategories();
+            }
         });
-
-        if (category) {
-
-            category.name = name;
-            category.description = description;
-
-            alert("Category updated successfully!");
-
-        }
-
     }
-
-
-    categoryDialog.close();
-
-    categoryForm.reset();
 
     displayCategories();
-
-}
-
-
-// Delete category
-
-function deleteCategory(id) {
-
-    const confirmation = confirm(
-        "Are you sure you want to delete this category?"
-    );
-
-    if (!confirmation) {
-        return;
-    }
-
-    categories = categories.filter(function(category) {
-        return category.id !== id;
-    });
-
-    alert("Category deleted successfully!");
-
-    displayCategories();
-
-}
-
-
-// Handle edit and delete clicks
-
-categoryTableBody.addEventListener("click", function(event) {
-
-    const button = event.target.closest("button");
-
-    if (!button) {
-        return;
-    }
-
-    const id = Number(button.dataset.id);
-
-    const action = button.dataset.action;
-
-    if (action === "edit") {
-
-        editCategory(id);
-
-    } else if (action === "delete") {
-
-        deleteCategory(id);
-
-    }
-
 });
-
-
-// Event listeners
-
-document.getElementById("addCategoryButton")
-    .addEventListener("click", openAddCategoryDialog);
-
-categoryForm.addEventListener("submit", saveCategory);
-
-searchCategory.addEventListener("input", displayCategories);
-
-document.getElementById("closeCategoryDialog")
-    .addEventListener("click", function() {
-
-        categoryDialog.close();
-
-    });
-
-
-// Initial display
-
-displayCategories();

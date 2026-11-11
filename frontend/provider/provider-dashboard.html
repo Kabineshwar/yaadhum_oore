@@ -4,16 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Provider Dashboard - YAADHUM OOORE</title>
+<link rel="stylesheet" href="../shared/css/common.css">
 <link rel="stylesheet" href="css/provider.css">
 </head>
 <body>
 <header><h1>YAADHUM OOORE</h1><p>Local Tourism Provider Portal</p></header>
 
 <nav>
-<a href="provider-dashboard.html">Dashboard</a>
+<a href="provider-dashboard.html" class="active">Dashboard</a>
 <a href="my-packages.html">My Packages</a>
 <a href="add-package.html">Add Package</a>
-<a href="provider-bookings.html">Bookings</a>
+<a href="package-bookings.html">Bookings</a>
 <a href="package-availability.html">Availability</a>
 <a href="provider-profile.html">Profile</a>
 <a href="provider-reviews.html">Reviews</a>
@@ -23,17 +24,47 @@
 <main>
 
 <h2>Welcome, Local Provider!</h2>
-<p>Manage your tourism packages, availability and customer bookings.</p>
+<p>Manage your tourism packages, availability, customer bookings, and performance reports.</p>
+
 <section class="cards">
-<div class="card"><h3>My Packages</h3><p id="dashboardPackages">0</p><a class="button" href="my-packages.html">View Packages</a></div>
-<div class="card"><h3>Total Bookings</h3><p>2 sample bookings</p><a class="button" href="provider-bookings.html">View Bookings</a></div>
-<div class="card"><h3>Customer Reviews</h3><p>Sample feedback</p><a class="button" href="provider-reviews.html">View Reviews</a></div>
-<div class="card"><h3>Reports</h3><p>Review your package activity.</p><a class="button" href="provider-reports.html">View Reports</a></div>
+<div class="card">
+  <h3>My Packages</h3>
+  <p id="dashboardPackages" style="font-size: 22px; font-weight: bold; color: #176b5b; margin: 8px 0;">0 active</p>
+  <a class="button" href="my-packages.html">View Packages</a>
+</div>
+<div class="card">
+  <h3>Customer Bookings</h3>
+  <p style="font-size: 22px; font-weight: bold; color: #176b5b; margin: 8px 0;">0 total</p>
+  <a class="button" href="package-bookings.html">View Bookings</a>
+</div>
+<div class="card">
+  <h3>Customer Reviews</h3>
+  <p style="font-size: 22px; font-weight: bold; color: #176b5b; margin: 8px 0;">0 reviews</p>
+  <a class="button" href="provider-reviews.html">View Reviews</a>
+</div>
+<div class="card">
+  <h3>Earnings & Reports</h3>
+  <p style="font-size: 22px; font-weight: bold; color: #176b5b; margin: 8px 0;">Earnings: ₹0</p>
+  <a class="button" href="provider-reports.html">View Reports</a>
+</div>
 </section>
-<p class="note">Package counts are based on packages saved in this browser. Backend and MySQL integration will be added later.</p>
+
+<div class="panel" style="margin-top: 25px;">
+  <h3>Quick Provider Actions</h3>
+  <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px;">
+    <a href="add-package.html" class="button">+ Create New Package</a>
+    <a href="package-availability.html" class="button secondary">Update Availability / Dates</a>
+    <a href="provider-profile.html" class="button secondary">Edit Business Profile</a>
+    <a href="../customer/packages.html" target="_blank" class="button secondary">Browse Customer View &rarr;</a>
+  </div>
+</div>
 
 </main>
 <footer><p>YAADHUM OOORE | Explore Your World</p></footer>
+
+<script src="../shared/js/api.js"></script>
+<script src="../shared/js/session.js"></script>
+<script src="../shared/js/navbar.js"></script>
 <script src="js/provider.js"></script>
 </body>
 </html>

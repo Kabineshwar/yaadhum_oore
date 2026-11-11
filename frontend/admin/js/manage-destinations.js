@@ -1,365 +1,138 @@
-// Sample destination data
+// ============================================
+// YAADHUM OOORE - MANAGE DESTINATIONS
+// Integrated with Shared State & Real Actions
+// ============================================
 
-let destinations = [
-    {
-        id: 401,
-        name: "Ooty",
-        state: "Tamil Nadu",
-        category: "Hill Station",
-        description: "A popular hill station known for its tea gardens and scenic beauty.",
-        status: "Active"
-    },
+const api = window.YaadhumAPI;
+let destinations = api ? api.getDestinations() : [];
 
-    {
-        id: 402,
-        name: "Mahabalipuram",
-        state: "Tamil Nadu",
-        category: "Heritage",
-        description: "Famous for its ancient temples and stone monuments.",
-        status: "Active"
-    },
-
-    {
-        id: 403,
-        name: "Pondicherry",
-        state: "Puducherry",
-        category: "Beach",
-        description: "Known for its beaches, French architecture and peaceful atmosphere.",
-        status: "Active"
-    },
-
-    {
-        id: 404,
-        name: "Kodaikanal",
-        state: "Tamil Nadu",
-        category: "Nature",
-        description: "A scenic destination featuring lakes, forests and waterfalls.",
-        status: "Active"
-    },
-
-    {
-        id: 405,
-        name: "Rameswaram",
-        state: "Tamil Nadu",
-        category: "Heritage",
-        description: "A destination known for its temples and coastal attractions.",
-        status: "Active"
-    }
-];
-
-
-// Get HTML elements
-
-const tableBody = document.getElementById("destinationTableBody");
-
-const searchInput = document.getElementById("searchDestination");
-
-const categoryFilter = document.getElementById("categoryFilter");
-
-const destinationDialog = document.getElementById("destinationDialog");
-
+const destinationTableBody = document.getElementById("destinationTableBody");
+const searchDestination = document.getElementById("searchDestination");
+const destinationStatusFilter = document.getElementById("destinationStatusFilter");
+const destinationEmptyMessage = document.getElementById("destinationEmptyMessage");
 const destinationForm = document.getElementById("destinationForm");
 
-
-// Display destinations in the table
-
 function displayDestinations() {
+    if (api) destinations = api.getDestinations();
+    if (!destinationTableBody) return;
+    destinationTableBody.innerHTML = "";
 
-    tableBody.textContent = "";
+    const searchText = (searchDestination ? searchDestination.value : "").toLowerCase();
+    const selectedStatus = destinationStatusFilter ? destinationStatusFilter.value : "All";
 
-    const searchValue = searchInput.value.toLowerCase();
+    const filtered = destinations.filter(function(item) {
+        const name = (item.name || "").toLowerCase();
+        const city = (item.city || "").toLowerCase();
+        const status = item.status || "Active";
 
-    const selectedCategory = categoryFilter.value;
-
-    const filteredDestinations = destinations.filter(function(destination) {
-
-        const matchesSearch =
-            destination.name.toLowerCase().includes(searchValue) ||
-            destination.state.toLowerCase().includes(searchValue);
-
-        const matchesCategory =
-            selectedCategory === "All" ||
-            destination.category === selectedCategory;
-
-        return matchesSearch && matchesCategory;
-
+        const matchesSearch = name.includes(searchText) || city.includes(searchText);
+        const matchesStatus = selectedStatus === "All" || status === selectedStatus;
+        return matchesSearch && matchesStatus;
     });
 
+    if (destinationEmptyMessage) {
+        destinationEmptyMessage.hidden = filtered.length !== 0;
+    }
 
-    filteredDestinations.forEach(function(destination) {
-
+    filtered.forEach(function(item) {
         const row = document.createElement("tr");
 
-        // ID
         const idCell = document.createElement("td");
-        idCell.textContent = destination.id;
+        idCell.textContent = item.id;
 
-        // Name
         const nameCell = document.createElement("td");
-        nameCell.textContent = destination.name;
+        nameCell.textContent = item.name;
 
-        // State
-        const stateCell = document.createElement("td");
-        stateCell.textContent = destination.state;
+        const locationCell = document.createElement("td");
+        locationCell.textContent = `${item.city || item.name}, ${item.state || 'Tamil Nadu'}`;
 
-        // Category
-        const categoryCell = document.createElement("td");
-        categoryCell.textContent = destination.category;
+        const descCell = document.createElement("td");
+        descCell.textContent = item.description || "N/A";
 
-        // Status
         const statusCell = document.createElement("td");
-        statusCell.textContent = destination.status;
-        statusCell.className = "status approved";
+        const status = item.status || "Active";
+        const statusLabel = document.createElement("span");
+        statusLabel.className = "status " + status.toLowerCase();
+        statusLabel.textContent = status;
+        statusCell.appendChild(statusLabel);
 
-        // Actions
         const actionCell = document.createElement("td");
+        actionCell.style.cssText = "display: flex; gap: 6px;";
 
-        const editButton = document.createElement("button");
-        editButton.textContent = "Edit";
-        editButton.className = "view-button";
-        editButton.dataset.action = "edit";
-        editButton.dataset.id = destination.id;
+        const toggleBtn = document.createElement("button");
+        toggleBtn.textContent = status === "Active" ? "Deactivate" : "Activate";
+        toggleBtn.className = "action-button " + (status === "Active" ? "reject-button" : "approve-button");
+        toggleBtn.onclick = function() {
+            item.status = status === "Active" ? "Inactive" : "Active";
+            if (api) api.saveDestination(item);
+            displayDestinations();
+        };
+        actionCell.appendChild(toggleBtn);
 
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.className = "reject-button";
-        deleteButton.dataset.action = "delete";
-        deleteButton.dataset.id = destination.id;
-
-        actionCell.appendChild(editButton);
-        actionCell.appendChild(deleteButton);
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "action-button reject-button";
+        deleteBtn.onclick = function() {
+            if (confirm(`Delete destination ${item.name}?`)) {
+                if (api) api.deleteDestination(item.id);
+                displayDestinations();
+            }
+        };
+        actionCell.appendChild(deleteBtn);
 
         row.appendChild(idCell);
         row.appendChild(nameCell);
-        row.appendChild(stateCell);
-        row.appendChild(categoryCell);
+        row.appendChild(locationCell);
+        row.appendChild(descCell);
         row.appendChild(statusCell);
         row.appendChild(actionCell);
 
-        tableBody.appendChild(row);
-
+        destinationTableBody.appendChild(row);
     });
-
-
-    // Show empty message if no destinations match
-
-    document.getElementById("emptyDestinationMessage").style.display =
-        filteredDestinations.length === 0 ? "block" : "none";
-
 
     updateDestinationStatistics();
-
 }
-
-
-// Update destination statistics
 
 function updateDestinationStatistics() {
+    if (api) destinations = api.getDestinations();
+    const total = destinations.length;
+    const active = destinations.filter(d => (d.status || "Active") === "Active").length;
+    const inactive = destinations.filter(d => d.status === "Inactive").length;
 
-    document.getElementById("totalDestinations").textContent =
-        destinations.length;
+    const elTotal = document.getElementById("totalDestinations");
+    const elAct = document.getElementById("activeDestinations");
+    const elInact = document.getElementById("inactiveDestinations");
 
-    const activeCount = destinations.filter(function(destination) {
-        return destination.status === "Active";
-    }).length;
-
-    document.getElementById("activeDestinations").textContent =
-        activeCount;
-
+    if (elTotal) elTotal.textContent = total;
+    if (elAct) elAct.textContent = active;
+    if (elInact) elInact.textContent = inactive;
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    if (searchDestination) searchDestination.addEventListener("input", displayDestinations);
+    if (destinationStatusFilter) destinationStatusFilter.addEventListener("change", displayDestinations);
 
-// Open dialog for adding a destination
+    if (destinationForm) {
+        destinationForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const name = document.getElementById("destinationName").value.trim();
+            const location = document.getElementById("destinationLocation").value.trim();
+            const desc = document.getElementById("destinationDescription").value.trim();
 
-function openAddDestinationDialog() {
-
-    destinationForm.reset();
-
-    document.getElementById("destinationId").value = "";
-
-    document.getElementById("dialogTitle").textContent =
-        "Add Destination";
-
-    document.getElementById("saveDestinationButton").textContent =
-        "Save Destination";
-
-    destinationDialog.showModal();
-
-}
-
-
-// Open dialog for editing a destination
-
-function editDestination(id) {
-
-    const destination = destinations.find(function(item) {
-        return item.id === id;
-    });
-
-    if (!destination) {
-        return;
-    }
-
-    document.getElementById("destinationId").value =
-        destination.id;
-
-    document.getElementById("destinationName").value =
-        destination.name;
-
-    document.getElementById("destinationState").value =
-        destination.state;
-
-    document.getElementById("destinationCategory").value =
-        destination.category;
-
-    document.getElementById("destinationDescription").value =
-        destination.description;
-
-    document.getElementById("dialogTitle").textContent =
-        "Edit Destination";
-
-    document.getElementById("saveDestinationButton").textContent =
-        "Update Destination";
-
-    destinationDialog.showModal();
-
-}
-
-
-// Add or update destination
-
-function saveDestination(event) {
-
-    event.preventDefault();
-
-    const id = document.getElementById("destinationId").value;
-
-    const name = document.getElementById("destinationName").value.trim();
-
-    const state = document.getElementById("destinationState").value.trim();
-
-    const category = document.getElementById("destinationCategory").value;
-
-    const description =
-        document.getElementById("destinationDescription").value.trim();
-
-
-    if (id === "") {
-
-        // Add new destination
-
-        const newDestination = {
-            id: Date.now(),
-            name: name,
-            state: state,
-            category: category,
-            description: description,
-            status: "Active"
-        };
-
-        destinations.push(newDestination);
-
-        alert("Destination added successfully!");
-
-    } else {
-
-        // Update existing destination
-
-        const destination = destinations.find(function(item) {
-            return item.id === Number(id);
+            if (name && api) {
+                api.saveDestination({
+                    name: name,
+                    city: location,
+                    state: "Tamil Nadu",
+                    country: "India",
+                    description: desc,
+                    status: "Active"
+                });
+                destinationForm.reset();
+                displayDestinations();
+            }
         });
-
-        if (destination) {
-
-            destination.name = name;
-            destination.state = state;
-            destination.category = category;
-            destination.description = description;
-
-            alert("Destination updated successfully!");
-
-        }
-
     }
-
-    destinationDialog.close();
-
-    destinationForm.reset();
 
     displayDestinations();
-
-}
-
-
-// Delete destination
-
-function deleteDestination(id) {
-
-    const confirmation = confirm(
-        "Are you sure you want to delete this destination?"
-    );
-
-    if (!confirmation) {
-        return;
-    }
-
-    destinations = destinations.filter(function(destination) {
-        return destination.id !== id;
-    });
-
-    alert("Destination deleted successfully!");
-
-    displayDestinations();
-
-}
-
-
-// Handle edit and delete button clicks
-
-tableBody.addEventListener("click", function(event) {
-
-    const button = event.target.closest("button");
-
-    if (!button) {
-        return;
-    }
-
-    const id = Number(button.dataset.id);
-
-    const action = button.dataset.action;
-
-    if (action === "edit") {
-
-        editDestination(id);
-
-    } else if (action === "delete") {
-
-        deleteDestination(id);
-
-    }
-
 });
-
-
-// Event listeners
-
-document.getElementById("addDestinationButton")
-    .addEventListener("click", openAddDestinationDialog);
-
-destinationForm.addEventListener("submit", saveDestination);
-
-searchInput.addEventListener("input", displayDestinations);
-
-categoryFilter.addEventListener("change", displayDestinations);
-
-document.getElementById("closeDestinationDialog")
-    .addEventListener("click", function() {
-
-        destinationDialog.close();
-
-    });
-
-
-// Initial display
-
-displayDestinations();

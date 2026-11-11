@@ -3,20 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Sign in to your YAADHUM OOORE customer account to manage your local tourism bookings, wishlists, and travel experiences.">
-  <title>Customer Login | YAADHUM OOORE</title>
+  <meta name="description" content="Sign in to your YAADHUM OOORE account to access customer bookings, provider management, or administration portals.">
+  <title>Login | YAADHUM OOORE</title>
   
-  <!-- Shared Customer Design System -->
+  <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="../shared/css/responsive.css">
   <link rel="stylesheet" href="css/customer.css">
+  <style>
+    .demo-role-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 10px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: #FFFFFF;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      width: 100%;
+    }
+    .demo-role-btn:hover {
+      border-color: var(--color-primary);
+      background: #F8FAFC;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    .demo-role-btn strong {
+      font-size: 13px;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .demo-role-btn small {
+      color: var(--color-text-muted);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+  </style>
 </head>
 <body>
 
   <!-- Top Announcement Bar -->
   <div class="announcement-bar">
     <div class="container">
-      <span class="tamil-phrase" style="color: var(--color-gold);">"யாதும் ஊரே யாவரும் கேளிர்"</span>
+      <span class="tamil-phrase">"யாதும் ஊரே யாவரும் கேளிர்"</span>
       &nbsp;&bull;&nbsp; To us all towns are one, all people our kin &nbsp;&bull;&nbsp;
-      <strong>Customer Portal</strong>
+      <strong>Unified Login Portal</strong>
     </div>
   </div>
 
@@ -61,22 +96,45 @@
 
   <!-- Main Content Area: Auth Card -->
   <main class="auth-page-wrapper">
-    <div class="auth-card">
+    <div class="auth-card" style="max-width: 520px;">
       
       <!-- Auth Header -->
       <div class="auth-header">
         <div class="auth-logo-badge">ய</div>
-        <h1 class="auth-title">Welcome Back</h1>
-        <p class="auth-subtitle">Sign in to access your bookings and saved tours</p>
+        <h1 class="auth-title">Welcome to YAADHUM OOORE</h1>
+        <p class="auth-subtitle">Sign in to your account. Your role determines your dashboard.</p>
+      </div>
+
+      <!-- Quick 1-Click Role Testing Card -->
+      <div style="background: #F7FAFC; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--color-primary); letter-spacing: 0.5px;">
+            ⚡ Quick Demo Logins (All 4 Roles)
+          </span>
+          <span style="font-size: 11px; color: var(--color-text-muted);">One-click fill</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button type="button" class="demo-role-btn" onclick="quickFillLogin('customer@yaadhum.local', 'password123')">
+            <strong>👤 Customer</strong>
+            <small>Kaniyan Pungundran</small>
+          </button>
+          <button type="button" class="demo-role-btn" onclick="quickFillLogin('selvam@tamilnadutours.in', 'password123')">
+            <strong>🏕️ Provider</strong>
+            <small>Mountain Adventures</small>
+          </button>
+          <button type="button" class="demo-role-btn" onclick="quickFillLogin('admin@yaadhum.local', 'password123')">
+            <strong>🛡️ Admin</strong>
+            <small>Priya Sundaram</small>
+          </button>
+          <button type="button" class="demo-role-btn" onclick="quickFillLogin('superadmin@yaadhum.local', 'password123')">
+            <strong>👑 Super Admin</strong>
+            <small>Super Administrator</small>
+          </button>
+        </div>
       </div>
 
       <!-- Top Notification Banner -->
       <div id="loginAlert" class="alert" role="alert" aria-live="polite"></div>
-
-      <!-- Academic Demonstration Notice -->
-      <div class="alert alert-demo is-visible" style="margin-bottom: 20px;">
-        <strong>Academic Project Notice:</strong> Database-driven backend API is currently in development (Person 2). Form validation and simulated demo authentication are fully operational.
-      </div>
 
       <!-- Login Form -->
       <form id="loginForm" novalidate>
@@ -89,7 +147,7 @@
             id="email" 
             name="email" 
             class="form-input" 
-            placeholder="example@yaadhum.local" 
+            placeholder="e.g. customer@yaadhum.local" 
             required 
             autocomplete="email"
           >
@@ -121,28 +179,26 @@
           <span id="passwordError" class="form-error-msg" aria-live="polite"></span>
         </div>
 
-        <!-- Options Row (Remember Me & Forgot Password) -->
+        <!-- Options Row -->
         <div class="auth-options-row">
           <label class="form-checkbox-group" style="margin: 0;">
-            <input type="checkbox" id="rememberMe" name="rememberMe">
+            <input type="checkbox" id="rememberMe" name="rememberMe" checked>
             <span class="form-checkbox-label">Remember me</span>
           </label>
-          <a href="#" onclick="alert('Password reset facility will be integrated with the shared backend authentication service (Person 2).'); return false;" style="font-size: 0.85rem; color: var(--color-terracotta);">
-            Forgot Password?
-          </a>
+          <span style="font-size: 0.85rem; color: var(--color-text-muted);">Default demo pass: <code>password123</code></span>
         </div>
 
         <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 15px;">
           Sign In to YAADHUM OOORE &rarr;
         </button>
 
       </form>
 
       <!-- Auth Footer Link -->
-      <div class="auth-footer">
-        Don't have a customer account? 
-        <a href="register.html">Create an Account</a>
+      <div class="auth-footer" style="margin-top: 20px;">
+        Don't have an account? 
+        <a href="register.html">Create an Account (Customer or Provider)</a>
       </div>
 
       <!-- Return to Home Link -->
@@ -159,15 +215,13 @@
   <footer class="site-footer">
     <div class="container">
       <div class="footer-grid">
-        
         <div class="footer-col">
           <h3 class="footer-brand-title">YAADHUM OOORE</h3>
           <p class="footer-tagline">"யாதும் ஊரே யாவரும் கேளிர்"</p>
           <p class="footer-desc">
-            An academic local tourism platform connecting travellers with authentic experiences across Tamil Nadu.
+            Local Tourism Platform connecting travelers with authentic verified experiences across Tamil Nadu.
           </p>
         </div>
-
         <div class="footer-col">
           <h4 class="footer-col-title">Quick Links</h4>
           <ul class="footer-links">
@@ -177,45 +231,45 @@
             <li><a href="search-packages.html" class="footer-link">Search</a></li>
           </ul>
         </div>
-
         <div class="footer-col">
-          <h4 class="footer-col-title">Customer Access</h4>
+          <h4 class="footer-col-title">Portals</h4>
           <ul class="footer-links">
-            <li><a href="login.html" class="footer-link">Sign In</a></li>
-            <li><a href="register.html" class="footer-link">Create Account</a></li>
-            <li><a href="customer-dashboard.html" class="footer-link">Dashboard</a></li>
-            <li><a href="my-bookings.html" class="footer-link">My Bookings</a></li>
+            <li><a href="customer-dashboard.html" class="footer-link">Customer Dashboard</a></li>
+            <li><a href="../provider/provider-dashboard.html" class="footer-link">Provider Portal</a></li>
+            <li><a href="../admin/admin-dashboard.html" class="footer-link">Admin Portal</a></li>
+            <li><a href="../admin/superadmin-dashboard.html" class="footer-link">Super Admin Portal</a></li>
           </ul>
         </div>
-
         <div class="footer-col">
-          <h4 class="footer-col-title">Platform Portals</h4>
-          <ul class="footer-links">
-            <li><a href="../provider/provider-dashboard.html" class="footer-link">Provider Dashboard</a></li>
-            <li><a href="../admin/admin-dashboard.html" class="footer-link">Admin Dashboard</a></li>
-          </ul>
+          <h4 class="footer-col-title">Roles & Access</h4>
+          <p style="font-size: 13px; color: #A0AEC0;">
+            Role-based access automatically routes customers, tour providers, and administrators to their respective workflows.
+          </p>
         </div>
-
       </div>
-
       <div class="footer-bottom">
-        <div>
-          &copy; 2026 <strong>YAADHUM OOORE</strong>. All rights reserved.
-        </div>
-        <div class="portal-links">
-          <a href="../index.html" class="portal-link">Landing Page</a>
-          <span>&bull;</span>
-          <a href="../provider/provider-dashboard.html" class="portal-link">Provider Portal</a>
-          <span>&bull;</span>
-          <a href="../admin/admin-dashboard.html" class="portal-link">Admin Portal</a>
-        </div>
+        &copy; 2026 YAADHUM OOORE &bull; Web Technology Project
       </div>
     </div>
   </footer>
 
-  <!-- Customer Module Vanilla JavaScript -->
+  <script src="../shared/js/api.js"></script>
+  <script src="../shared/js/session.js"></script>
+  <script src="../shared/js/navbar.js"></script>
   <script src="js/customer.js"></script>
-
+  <script>
+    function quickFillLogin(email, password) {
+      const emailField = document.getElementById('email');
+      const passField = document.getElementById('password');
+      if (emailField) emailField.value = email;
+      if (passField) passField.value = password;
+      const form = document.getElementById('loginForm');
+      if (form) {
+        // Trigger submit
+        const submitEvent = new Event('submit', { cancelable: true, bubbles: true });
+        form.dispatchEvent(submitEvent);
+      }
+    }
+  </script>
 </body>
 </html>
-

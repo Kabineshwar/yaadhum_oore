@@ -1,0 +1,22 @@
+{
+  "name": "yaadhum-ooore-backend",
+  "version": "1.0.0",
+  "description": "YAADHUM OOORE - Local Tourism Package Booking System Backend (Native Node.js built-in modules without Express.js)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "tourism",
+    "tamil-nadu",
+    "vanilla-node",
+    "rest-api",
+    "no-express"
+  ],
+  "author": "Web Technology Mini Project Team",
+  "license": "ISC",
+  "dependencies": {
+    "mysql2": "^3.9.0"
+  }
+}
