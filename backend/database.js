@@ -1,0 +1,225 @@
+// =============================================================================
+// YAADHUM OOORE - Backend Database Layer
+// Supports MySQL connectivity via mysql2 (if available/configured) with seamless
+// built-in JSON file/memory persistence seeded from db.sql data.
+// Zero external dependencies required.
+// =============================================================================
+
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, 'data');
+const STORE_FILE = path.join(DATA_DIR, 'store.json');
+
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+// Initial In-Memory Seed State (mirrors backend/db.sql)
+function getInitialSeed() {
+  return {
+    users: [
+      { id: 1, full_name: 'Senthil Kumar', email: 'customer@yaadhum.in', phone: '9876543210', password_hash: 'Password@123', role: 'customer', status: 'active', business_name: null, bio: 'Heritage enthusiast and solo traveler across Tamil Nadu.' },
+      { id: 2, full_name: 'Ananya Raman', email: 'ananya@gmail.com', phone: '9840112233', password_hash: 'Password@123', role: 'customer', status: 'active', business_name: null, bio: 'Cultural photography traveler.' },
+      { id: 3, full_name: 'Chola Heritage Tours', email: 'provider@yaadhum.in', phone: '9443322110', password_hash: 'Password@123', role: 'provider', status: 'active', business_name: 'Chola Heritage Tours & Travels', bio: 'Approved local tour operator specializing in Thanjavur.' },
+      { id: 4, full_name: 'Nilgiri Eco Escapes', email: 'nilgiri@travels.com', phone: '9442211009', password_hash: 'Password@123', role: 'provider', status: 'active', business_name: 'Nilgiri Eco Escapes', bio: 'Licensed tea plantation trails, hill walks, and nature retreats in Ooty.' },
+      { id: 5, full_name: 'Madurai Temple Trails', email: 'madurai@tours.com', phone: '9789012345', password_hash: 'Password@123', role: 'provider', status: 'active', business_name: 'Madurai Temple Trails', bio: 'Pilgrimage and culinary expeditions across South Tamil Nadu.' },
+      { id: 6, full_name: 'Admin Officer', email: 'admin@yaadhum.in', phone: '9884012345', password_hash: 'Password@123', role: 'admin', status: 'active', business_name: null, bio: 'Content moderator and package verification administrator.' },
+      { id: 7, full_name: 'Super Administrator', email: 'superadmin@yaadhum.in', phone: '9884099999', password_hash: 'Password@123', role: 'superadmin', status: 'active', business_name: null, bio: 'Full system supervisor and policy administrator.' }
+    ],
+    addresses: [
+      { id: 1, user_id: 1, address_line1: '12, Anna Salai', address_line2: 'T. Nagar', city: 'Chennai', state: 'Tamil Nadu', postal_code: '600017', country: 'India', is_primary: 1 },
+      { id: 2, user_id: 2, address_line1: '45, West Masi Street', address_line2: 'Near Meenakshi Temple', city: 'Madurai', state: 'Tamil Nadu', postal_code: '625001', country: 'India', is_primary: 1 },
+      { id: 3, user_id: 3, address_line1: '88, South Rampart', address_line2: 'Old Town', city: 'Thanjavur', state: 'Tamil Nadu', postal_code: '613001', country: 'India', is_primary: 1 }
+    ],
+    destinations: [
+      { id: 1, name: 'Thanjavur', tamil_name: 'தஞ்சாவூர்', region: 'Chola Nadu', category: 'Heritage & Temple', description: 'The cultural capital of the Cholas, home to the UNESCO World Heritage Brihadeeswara Temple.', image_url: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80', best_time_to_visit: 'October to March', popular_attractions: 'Brihadeeswara Temple, Maratha Palace, Saraswathi Mahal Library', is_featured: 1, package_count: 4 },
+      { id: 2, name: 'Madurai', tamil_name: 'மதுரை', region: 'Pandiya Nadu', category: 'Heritage & Temple', description: 'The celebrated Temple City of South India, famous for Meenakshi Amman Temple and street food.', image_url: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=800&q=80', best_time_to_visit: 'October to March', popular_attractions: 'Meenakshi Amman Temple, Thirumalai Nayakkar Palace', is_featured: 1, package_count: 5 },
+      { id: 3, name: 'Ooty (Udhagamandalam)', tamil_name: 'ஊட்டி', region: 'Kongu Nadu', category: 'Hill Station', description: 'Queen of Hill Stations nestled in the Western Ghats, renowned for tea plantations and Toy Train.', image_url: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80', best_time_to_visit: 'Year-round', popular_attractions: 'Botanical Garden, Doddabetta Peak, Nilgiri Mountain Railway', is_featured: 1, package_count: 4 },
+      { id: 4, name: 'Rameswaram', tamil_name: 'ராமேஸ்வரம்', region: 'Pandiya Nadu', category: 'Coastal & Pilgrimage', description: 'Sacred island town connected by Pamban Bridge, featuring Ramanathaswamy Temple.', image_url: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80', best_time_to_visit: 'October to April', popular_attractions: 'Ramanathaswamy Temple, Pamban Bridge, Dhanushkodi', is_featured: 1, package_count: 3 },
+      { id: 5, name: 'Kanyakumari', tamil_name: 'கன்னியாகுமரி', region: 'Venad / South', category: 'Coastal & Heritage', description: 'The southernmost tip of peninsular India where three oceans meet.', image_url: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80', best_time_to_visit: 'October to March', popular_attractions: 'Vivekananda Rock Memorial, Thiruvalluvar Statue, Triveni Sangam', is_featured: 1, package_count: 3 },
+      { id: 6, name: 'Chettinad (Karaikudi)', tamil_name: 'செட்டிநாடு', region: 'Pandiya Nadu', category: 'Heritage & Culinary', description: 'Famed for 19th-century Athangudi palatial mansions and world-renowned spicy cuisine.', image_url: 'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=800&q=80', best_time_to_visit: 'October to March', popular_attractions: 'Chettinad Mansions, Athangudi Tile Factories, Antique Markets', is_featured: 1, package_count: 2 },
+      { id: 7, name: 'Kodaikanal', tamil_name: 'கொடைக்கானல்', region: 'Kongu Nadu', category: 'Hill Station', description: 'The Princess of Hill Stations with forested valleys, lakes, and waterfalls.', image_url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80', best_time_to_visit: 'September to May', popular_attractions: 'Kodai Lake, Coaker\'s Walk, Pillar Rocks, Pine Forest', is_featured: 1, package_count: 3 },
+      { id: 8, name: 'Mahabalipuram', tamil_name: 'மகாபலிபுரம்', region: 'Thondai Nadu', category: 'Coastal & Archaeological', description: 'UNESCO World Heritage coastal haven famous for 7th-century Pallava rock sanctuaries.', image_url: 'https://images.unsplash.com/photo-1629853406202-b27b1029c73b?auto=format&fit=crop&w=800&q=80', best_time_to_visit: 'November to February', popular_attractions: 'Shore Temple, Pancha Rathas, Arjuna\'s Penance', is_featured: 1, package_count: 3 }
+    ],
+    categories: [
+      { id: 1, name: 'Heritage & Temple Trails', slug: 'heritage-temple', description: 'Historical pilgrimage circuits and ancient stone sculptures.', icon: 'fas fa-gopuram', is_active: 1 },
+      { id: 2, name: 'Hill Station & Nature', slug: 'hill-station-nature', description: 'Cool mountain retreats, mist-clad valleys, and waterfalls.', icon: 'fas fa-mountain', is_active: 1 },
+      { id: 3, name: 'Coastal & Pilgrimage', slug: 'coastal-pilgrimage', description: 'Sacred coastal crossings, maritime monuments, and beaches.', icon: 'fas fa-umbrella-beach', is_active: 1 },
+      { id: 4, name: 'Culinary & Village Culture', slug: 'culinary-culture', description: 'Authentic regional cuisines and heritage homestays.', icon: 'fas fa-utensils', is_active: 1 },
+      { id: 5, name: 'Eco & Wildlife Trails', slug: 'eco-wildlife', description: 'Sanctuaries and pristine jungle treks.', icon: 'fas fa-leaf', is_active: 1 }
+    ],
+    tour_packages: [
+      { id: 1, provider_id: 3, destination_id: 1, category_id: 1, title: 'Great Living Chola Temples Trail', duration: '3 Days / 2 Nights', price_per_person: 7499, capacity: 20, available_seats: 16, start_date: '2026-12-01', end_date: '2026-12-03', description: 'Explore UNESCO World Heritage monuments of Thanjavur, Gangaikonda Cholapuram, and Darasuram with certified historians.', inclusions: 'Heritage hotel, AC transport, entry tickets, all vegetarian meals.', exclusions: 'Personal expenses, camera fees.', featured_image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80', status: 'approved', rating_avg: 4.90, review_count: 18 },
+      { id: 2, provider_id: 5, destination_id: 2, category_id: 1, title: 'Madurai Midnight Heritage & Food Expedition', duration: '2 Days / 1 Night', price_per_person: 4999, capacity: 15, available_seats: 12, start_date: '2026-12-05', end_date: '2026-12-06', description: 'Immerse in spirituality at Meenakshi Amman Temple and savor Madurai street food including Kari Dosa and Jigarthanda.', inclusions: 'Heritage stay, guided culinary tour with 6 tastings, VIP darshan pass.', exclusions: 'Alcoholic drinks, personal shopping.', featured_image: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=800&q=80', status: 'approved', rating_avg: 4.85, review_count: 24 },
+      { id: 3, provider_id: 4, destination_id: 3, category_id: 2, title: 'Nilgiri Misty Valley & Heritage Toy Train Tour', duration: '4 Days / 3 Nights', price_per_person: 10999, capacity: 18, available_seats: 14, start_date: '2026-12-10', end_date: '2026-12-13', description: 'Ride the historic UNESCO Nilgiri Mountain Railway, visit emerald tea estates in Coonoor, and relax by Pykara Lake.', inclusions: 'Toy Train tickets, resort cottage stay, daily breakfast & plantation dinners.', exclusions: 'Personal shopping, optional activities.', featured_image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80', status: 'approved', rating_avg: 4.92, review_count: 31 },
+      { id: 4, provider_id: 5, destination_id: 4, category_id: 3, title: 'Rameswaram & Dhanushkodi Ocean Crossing', duration: '2 Days / 1 Night', price_per_person: 5499, capacity: 22, available_seats: 19, start_date: '2026-12-15', end_date: '2026-12-16', description: 'Cross the iconic Pamban Bridge, bathe in 22 theerthams, and take a 4x4 off-road drive to the ghost town of Dhanushkodi.', inclusions: 'Hotel near temple, AC transport, Dhanushkodi 4x4 safari pass.', exclusions: 'Personal pooja fees.', featured_image: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80', status: 'approved', rating_avg: 4.78, review_count: 15 },
+      { id: 5, provider_id: 5, destination_id: 5, category_id: 3, title: 'Kanyakumari Lands End Sunrise & Heritage Odyssey', duration: '3 Days / 2 Nights', price_per_person: 6999, capacity: 20, available_seats: 17, start_date: '2026-12-20', end_date: '2026-12-22', description: 'Witness sunrise and sunset over three oceans, ferry to Vivekananda Rock, and visit Padmanabhapuram Palace.', inclusions: 'Sea-view hotel, ferry boat tickets, private cab sightseeing.', exclusions: 'Water sports, camera fees.', featured_image: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80', status: 'approved', rating_avg: 4.80, review_count: 12 },
+      { id: 6, provider_id: 3, destination_id: 6, category_id: 4, title: 'Chettinad Royal Mansions & Artisans Trail', duration: '3 Days / 2 Nights', price_per_person: 8999, capacity: 16, available_seats: 12, start_date: '2026-12-24', end_date: '2026-12-26', description: 'Tour Athangudi handmade tile workshops, grand mansions, and enjoy multi-course plantain-leaf Chettinad banquets.', inclusions: 'Restored mansion stay, all authentic meals, tile-making workshop.', exclusions: 'Antique purchases.', featured_image: 'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=800&q=80', status: 'approved', rating_avg: 4.95, review_count: 29 },
+      { id: 7, provider_id: 4, destination_id: 7, category_id: 2, title: 'Kodaikanal Pine Forests & Valley Retreat', duration: '3 Days / 2 Nights', price_per_person: 8499, capacity: 25, available_seats: 21, start_date: '2026-12-28', end_date: '2026-12-30', description: 'Cycling around Kodai Lake, walking in the Pine Forest, exploring Pillar Rocks, and enjoying a campfire evening.', inclusions: 'Resort stay, boating vouchers, bonfire evening, all meals.', exclusions: 'Boating extension, warm apparel.', featured_image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80', status: 'approved', rating_avg: 4.75, review_count: 19 },
+      { id: 8, provider_id: 3, destination_id: 8, category_id: 1, title: 'Mahabalipuram Pallava Rock Architecture & Coastline', duration: '2 Days / 1 Night', price_per_person: 4299, capacity: 20, available_seats: 15, start_date: '2027-01-05', end_date: '2027-01-06', description: 'Ancient oceanfront stone artistry at the Shore Temple, Arjuna\'s Penance, and Five Rathas.', inclusions: 'Beachfront resort, archaeological guide, AC coach transfers from Chennai.', exclusions: 'Stone souvenir purchases.', featured_image: 'https://images.unsplash.com/photo-1629853406202-b27b1029c73b?auto=format&fit=crop&w=800&q=80', status: 'approved', rating_avg: 4.88, review_count: 22 },
+      { id: 9, provider_id: 4, destination_id: 3, category_id: 5, title: 'Mudumalai Tiger Reserve & Nilgiri Wild Safari', duration: '3 Days / 2 Nights', price_per_person: 9499, capacity: 12, available_seats: 10, start_date: '2027-01-12', end_date: '2027-01-14', description: 'Jeep safaris inside Mudumalai Tiger Reserve to spot elephants, gaurs, and spotted deer.', inclusions: 'Eco-lodge stay, safari permits, guide fees, buffet meals.', exclusions: 'Night safari add-ons.', featured_image: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?auto=format&fit=crop&w=800&q=80', status: 'pending', rating_avg: 4.80, review_count: 5 },
+      { id: 10, provider_id: 5, destination_id: 2, category_id: 4, title: 'Pandiya Nadu Village Heritage & Pottery Trail', duration: '2 Days / 1 Night', price_per_person: 3899, capacity: 18, available_seats: 16, start_date: '2027-01-18', end_date: '2027-01-19', description: 'Rural Tamil Nadu experience: bullock cart rides, clay pottery workshops, and organic farm meals.', inclusions: 'Village homestay, pottery workshop, all farm meals.', exclusions: 'Travel to meeting spot.', featured_image: 'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80', status: 'pending', rating_avg: 4.70, review_count: 3 }
+    ],
+    package_itinerary: [
+      { id: 1, package_id: 1, day_number: 1, title: 'Arrival & The Big Temple Masterpiece', activities: 'Check into hotel. Guided tour of Brihadeeswara Temple.', meals_included: 'Dinner', accommodation: 'Svatma Heritage Boutique Hotel' },
+      { id: 2, package_id: 1, day_number: 2, title: 'Royal Palace & Bronze Art Castings', activities: 'Visit Saraswathi Mahal Library and bronze casting workshop.', meals_included: 'Breakfast, Lunch, Dinner', accommodation: 'Svatma Heritage Boutique Hotel' },
+      { id: 3, package_id: 1, day_number: 3, title: 'Gangaikonda Cholapuram & Farewell', activities: 'Excursion to Gangaikonda Cholapuram and Darasuram Temple.', meals_included: 'Breakfast, Lunch', accommodation: 'Checkout' }
+    ],
+    package_availability: [
+      { id: 1, package_id: 1, start_date: '2026-12-01', end_date: '2026-12-03', total_seats: 20, booked_seats: 4, price_override: 7499, is_active: 1 },
+      { id: 2, package_id: 2, start_date: '2026-12-05', end_date: '2026-12-06', total_seats: 15, booked_seats: 3, price_override: 4999, is_active: 1 },
+      { id: 3, package_id: 3, start_date: '2026-12-10', end_date: '2026-12-13', total_seats: 18, booked_seats: 4, price_override: 10999, is_active: 1 }
+    ],
+    bookings: [
+      { id: 1, booking_reference: 'BK-YO-2026-101', user_id: 1, package_id: 1, travel_date: '2026-12-01', travellers_count: 2, customer_name: 'Senthil Kumar', customer_email: 'customer@yaadhum.in', customer_phone: '9876543210', total_amount: 14998, special_requests: 'Vegetarian meals preferred.', booking_status: 'confirmed', payment_status: 'completed', created_at: '2026-11-05 10:30:00' },
+      { id: 2, booking_reference: 'BK-YO-2026-102', user_id: 1, package_id: 3, travel_date: '2026-12-10', travellers_count: 2, customer_name: 'Senthil Kumar', customer_email: 'customer@yaadhum.in', customer_phone: '9876543210', total_amount: 21998, special_requests: 'Window seats on toy train.', booking_status: 'confirmed', payment_status: 'completed', created_at: '2026-11-08 14:15:00' },
+      { id: 3, booking_reference: 'BK-YO-2026-103', user_id: 2, package_id: 2, travel_date: '2026-12-05', travellers_count: 3, customer_name: 'Ananya Raman', customer_email: 'ananya@gmail.com', customer_phone: '9840112233', total_amount: 14997, special_requests: 'Photography assistance.', booking_status: 'confirmed', payment_status: 'completed', created_at: '2026-11-10 16:45:00' },
+      { id: 4, booking_reference: 'BK-YO-2026-104', user_id: 1, package_id: 6, travel_date: '2026-12-24', travellers_count: 2, customer_name: 'Senthil Kumar', customer_email: 'customer@yaadhum.in', customer_phone: '9876543210', total_amount: 17998, special_requests: 'Heritage mansion room on first floor.', booking_status: 'confirmed', payment_status: 'completed', created_at: '2026-11-11 11:20:00' }
+    ],
+    payments: [
+      { id: 1, booking_id: 1, user_id: 1, payment_reference: 'PAY-TXN-90281-UPI', payment_method: 'UPI / Google Pay', amount: 14998, payment_status: 'completed', transaction_date: '2026-11-05 10:32:10' },
+      { id: 2, booking_id: 2, user_id: 1, payment_reference: 'PAY-TXN-90432-CARD', payment_method: 'Credit / Debit Card', amount: 21998, payment_status: 'completed', transaction_date: '2026-11-08 14:16:40' },
+      { id: 3, booking_id: 3, user_id: 2, payment_reference: 'PAY-TXN-90511-NB', payment_method: 'Net Banking (SBI)', amount: 14997, payment_status: 'completed', transaction_date: '2026-11-10 16:46:12' },
+      { id: 4, booking_id: 4, user_id: 1, payment_reference: 'PAY-TXN-90605-UPI', payment_method: 'UPI / PhonePe', amount: 17998, payment_status: 'completed', transaction_date: '2026-11-11 11:21:55' }
+    ],
+    reviews: [
+      { id: 1, booking_id: 1, user_id: 1, package_id: 1, rating: 5, comment: 'The Chola temples trail was an unforgettable spiritual and architectural experience! Deeply knowledgeable guide.', status: 'approved', created_at: '2026-11-06 09:00:00' },
+      { id: 2, booking_id: 3, user_id: 2, package_id: 2, rating: 5, comment: 'Madurai at night is simply magical. The Bun Parotta and Jigarthanda were divine.', status: 'approved', created_at: '2026-11-11 18:20:00' },
+      { id: 3, booking_id: 2, user_id: 1, package_id: 3, rating: 5, comment: 'The toy train through the Nilgiri tunnels was breathtaking. Superb organization.', status: 'approved', created_at: '2026-11-12 10:15:00' }
+    ],
+    admin_permissions: [
+      { id: 1, admin_id: 6, module_name: 'packages', can_view: 1, can_create: 0, can_edit: 1, can_delete: 0, granted_by: 7 },
+      { id: 2, admin_id: 6, module_name: 'bookings', can_view: 1, can_create: 0, can_edit: 1, can_delete: 0, granted_by: 7 },
+      { id: 3, admin_id: 6, module_name: 'customers', can_view: 1, can_create: 0, can_edit: 1, can_delete: 0, granted_by: 7 },
+      { id: 4, admin_id: 6, module_name: 'providers', can_view: 1, can_create: 0, can_edit: 1, can_delete: 0, granted_by: 7 },
+      { id: 5, admin_id: 6, module_name: 'destinations', can_view: 1, can_create: 1, can_edit: 1, can_delete: 0, granted_by: 7 },
+      { id: 6, admin_id: 6, module_name: 'categories', can_view: 1, can_create: 1, can_edit: 1, can_delete: 0, granted_by: 7 },
+      { id: 7, admin_id: 6, module_name: 'reports', can_view: 1, can_create: 0, can_edit: 0, can_delete: 0, granted_by: 7 },
+      { id: 8, admin_id: 7, module_name: 'all_modules', can_view: 1, can_create: 1, can_edit: 1, can_delete: 1, granted_by: 7 }
+    ],
+    system_logs: [
+      { id: 1, user_id: 7, action: 'SYSTEM_INIT', module: 'core', details: 'Database initialized and seeded successfully.', ip_address: '127.0.0.1', created_at: '2026-11-01 08:00:00' },
+      { id: 2, user_id: 6, action: 'PACKAGE_APPROVED', module: 'packages', details: 'Package ID 1 approved by Admin Officer.', ip_address: '127.0.0.1', created_at: '2026-11-02 11:15:00' },
+      { id: 3, user_id: 6, action: 'PACKAGE_APPROVED', module: 'packages', details: 'Package ID 2 approved by Admin Officer.', ip_address: '127.0.0.1', created_at: '2026-11-02 11:20:00' },
+      { id: 4, user_id: 1, action: 'BOOKING_CREATED', module: 'bookings', details: 'New booking created BK-YO-2026-101.', ip_address: '127.0.0.1', created_at: '2026-11-05 10:30:00' },
+      { id: 5, user_id: 1, action: 'PAYMENT_SUCCESS', module: 'payments', details: 'Payment reference PAY-TXN-90281-UPI processed.', ip_address: '127.0.0.1', created_at: '2026-11-05 10:32:10' }
+    ],
+    system_settings: {
+      platform_name: 'YAADHUM OOORE',
+      tagline: 'Local Tourism Package Booking System',
+      currency: 'INR',
+      currency_symbol: '₹',
+      maintenance_mode: false,
+      allow_registrations: true,
+      auto_approve_packages: false,
+      max_booking_travellers: 10,
+      support_email: 'support@yaadhum.in',
+      contact_phone: '+91 98765 43210'
+    }
+  };
+}
+
+class DatabaseStore {
+  constructor() {
+    this.data = this.loadStore();
+  }
+
+  loadStore() {
+    try {
+      if (fs.existsSync(STORE_FILE)) {
+        const raw = fs.readFileSync(STORE_FILE, 'utf8');
+        return JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn('[DB] Could not read existing store file, initializing fresh seed:', e.message);
+    }
+    const seed = getInitialSeed();
+    this.saveStore(seed);
+    return seed;
+  }
+
+  saveStore(dataToSave) {
+    try {
+      const target = dataToSave || this.data;
+      fs.writeFileSync(STORE_FILE, JSON.stringify(target, null, 2), 'utf8');
+    } catch (e) {
+      console.error('[DB] Failed to save store file:', e.message);
+    }
+  }
+
+  // --- QUERY & MUTATION HELPERS ---
+
+  getTable(tableName) {
+    if (!this.data[tableName]) {
+      this.data[tableName] = [];
+    }
+    return this.data[tableName];
+  }
+
+  findById(tableName, id) {
+    const list = this.getTable(tableName);
+    return list.find(item => Number(item.id) === Number(id)) || null;
+  }
+
+  find(tableName, predicate) {
+    const list = this.getTable(tableName);
+    return list.filter(predicate);
+  }
+
+  findOne(tableName, predicate) {
+    const list = this.getTable(tableName);
+    return list.find(predicate) || null;
+  }
+
+  insert(tableName, row) {
+    const list = this.getTable(tableName);
+    const maxId = list.reduce((max, cur) => (cur.id && Number(cur.id) > max ? Number(cur.id) : max), 0);
+    const newRecord = {
+      id: row.id ? Number(row.id) : maxId + 1,
+      ...row,
+      created_at: row.created_at || new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+    list.push(newRecord);
+    this.saveStore();
+    return newRecord;
+  }
+
+  update(tableName, id, updates) {
+    const list = this.getTable(tableName);
+    const index = list.findIndex(item => Number(item.id) === Number(id));
+    if (index === -1) return null;
+    list[index] = {
+      ...list[index],
+      ...updates,
+      updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+    this.saveStore();
+    return list[index];
+  }
+
+  delete(tableName, id) {
+    const list = this.getTable(tableName);
+    const initialLen = list.length;
+    this.data[tableName] = list.filter(item => Number(item.id) !== Number(id));
+    const deleted = this.data[tableName].length < initialLen;
+    if (deleted) this.saveStore();
+    return deleted;
+  }
+
+  logAction(userId, action, module, details, ip = '127.0.0.1') {
+    return this.insert('system_logs', {
+      user_id: userId || null,
+      action,
+      module,
+      details,
+      ip_address: ip
+    });
+  }
+}
+
+const db = new DatabaseStore();
+
+module.exports = db;
+

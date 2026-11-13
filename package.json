@@ -1,0 +1,22 @@
+{
+  "name": "yaadhum-oore",
+  "version": "1.0.0",
+  "description": "YAADHUM OOORE - Local Tourism Package Booking System (Web Technology Project)",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "server": "node backend/server.js",
+    "dev": "node backend/server.js"
+  },
+  "keywords": [
+    "tourism",
+    "tamil-nadu",
+    "booking-system",
+    "vanilla-javascript",
+    "node-native-http",
+    "mysql"
+  ],
+  "author": "Team YAADHUM OOORE",
+  "license": "ISC"
+}
+

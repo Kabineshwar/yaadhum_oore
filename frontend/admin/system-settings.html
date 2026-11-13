@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Settings - YAADHUM OOORE</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>YAADHUM OOORE</h1>
+        <p>Super Administrator Control Panel</p>
+    </header>
+
+    <nav>
+        <a href="superadmin-dashboard.html">Dashboard</a>
+        <a href="manage-admins.html">Manage Admins</a>
+        <a href="permissions.html">Permissions</a>
+        <a href="system-logs.html">System Logs</a>
+        <a href="system-settings.html" class="active">System Settings</a>
+        <a href="destination-updates.html">Destination Updates</a>
+    </nav>
+
+    <main>
+
+        <h2>System Settings</h2>
+        <p>Configure the general settings and operating preferences of the platform.</p>
+
+        <form id="settingsForm">
+
+            <!-- General Settings -->
+            <section class="settings-section">
+
+                <h3>General Settings</h3>
+
+                <div class="settings-form-group">
+                    <label for="websiteName">Website Name</label>
+                    <input
+                        type="text"
+                        id="websiteName"
+                        value="YAADHUM OOORE"
+                        required
+                    >
+                </div>
+
+                <div class="settings-form-group">
+                    <label for="websiteDescription">Website Description</label>
+                    <textarea
+                        id="websiteDescription"
+                        rows="3"
+                        required
+                    >Local Tourism Package Booking Platform</textarea>
+                </div>
+
+                <div class="settings-form-group">
+                    <label for="supportEmail">Support Email</label>
+                    <input
+                        type="email"
+                        id="supportEmail"
+                        value="support@yaadhumooore.com"
+                        required
+                    >
+                </div>
+
+                <div class="settings-form-group">
+                    <label for="supportPhone">Support Phone</label>
+                    <input
+                        type="tel"
+                        id="supportPhone"
+                        value="9876543210"
+                        pattern="[0-9]{10}"
+                        required
+                    >
+                </div>
+
+            </section>
+
+            <!-- Platform Status -->
+            <section class="settings-section">
+
+                <h3>Platform Status</h3>
+
+                <div class="settings-toggle-group">
+                    <div>
+                        <strong>Website Status</strong>
+                        <p>Control whether the platform is available to visitors.</p>
+                    </div>
+
+                    <label class="settings-switch">
+                        <input type="checkbox" id="websiteStatus" checked>
+                        <span class="settings-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-toggle-group">
+                    <div>
+                        <strong>Maintenance Mode</strong>
+                        <p>Temporarily restrict normal platform access for maintenance.</p>
+                    </div>
+
+                    <label class="settings-switch">
+                        <input type="checkbox" id="maintenanceMode">
+                        <span class="settings-slider"></span>
+                    </label>
+                </div>
+
+            </section>
+
+            <!-- Booking Settings -->
+            <section class="settings-section">
+
+                <h3>Booking Settings</h3>
+
+                <div class="settings-form-group">
+                    <label for="bookingLimit">Maximum People Per Booking</label>
+                    <input
+                        type="number"
+                        id="bookingLimit"
+                        min="1"
+                        max="50"
+                        value="10"
+                        required
+                    >
+                </div>
+
+                <div class="settings-toggle-group">
+                    <div>
+                        <strong>Allow New Bookings</strong>
+                        <p>Allow customers to create new package bookings.</p>
+                    </div>
+
+                    <label class="settings-switch">
+                        <input type="checkbox" id="allowBookings" checked>
+                        <span class="settings-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-toggle-group">
+                    <div>
+                        <strong>Require Booking Approval</strong>
+                        <p>Require administrator approval before confirming bookings.</p>
+                    </div>
+
+                    <label class="settings-switch">
+                        <input type="checkbox" id="requireApproval">
+                        <span class="settings-slider"></span>
+                    </label>
+                </div>
+
+            </section>
+
+            <!-- Save and Reset -->
+            <div class="settings-actions">
+                <button type="submit" id="saveSettingsButton">
+                    Save Settings
+                </button>
+
+                <button type="button" id="resetSettingsButton">
+                    Reset Defaults
+                </button>
+            </div>
+
+            <p id="settingsMessage" class="settings-message" aria-live="polite"></p>
+
+        </form>
+
+    </main>
+
+    <script src="js/system-settings.js"></script>
+
+</body>
+</html>

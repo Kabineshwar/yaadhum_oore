@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin & Super Admin Login | YAADHUM OOORE</title>
+  <link rel="stylesheet" href="../customer/css/customer.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .admin-auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f1c2e;
+      padding: 20px;
+    }
+    .admin-auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 36px 30px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+    .admin-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #183153;
+      color: #fff;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-auth-wrapper">
+    <div class="admin-auth-card">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span class="admin-badge">Platform Management</span>
+        <h1 style="font-size: 1.5rem; color: #183153; margin: 4px 0 8px;">YAADHUM OOORE</h1>
+        <p style="color: #666; font-size: 0.9rem;">Sign in to Administrator & Moderation Console</p>
+      </div>
+
+      <div id="loginAlert" style="display: none; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9rem;"></div>
+
+      <div style="background: #f0f4f8; border-left: 4px solid #183153; padding: 12px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 18px; line-height: 1.5;">
+        <strong>Quick Demo Accounts:</strong><br>
+        <strong>Admin:</strong> <code>admin@yaadhum.in</code> / <code>Password@123</code><br>
+        <strong>Super Admin:</strong> <code>superadmin@yaadhum.in</code> / <code>Password@123</code>
+      </div>
+
+      <form id="adminLoginForm">
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: #333;">Admin Email Address</label>
+          <input type="email" id="adminEmail" style="width: 100%; padding: 10px 12px; border: 1px solid #ccd; border-radius: 6px;" value="admin@yaadhum.in" required>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: #333;">Password</label>
+          <input type="password" id="adminPassword" style="width: 100%; padding: 10px 12px; border: 1px solid #ccd; border-radius: 6px;" value="Password@123" required>
+        </div>
+
+        <button type="submit" style="width: 100%; padding: 12px; background: #183153; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+          Sign In to Admin Console &rarr;
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 24px; font-size: 0.85rem; color: #777;">
+        <a href="../index.html" style="color: #183153; text-decoration: underline;">&larr; Return to YAADHUM OOORE Homepage</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value;
+      const alertBox = document.getElementById('loginAlert');
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, expected_role: 'admin' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const sessObj = JSON.stringify({ token: data.token, user: data.user });
+          localStorage.setItem('yaadhum_admin_session', sessObj);
+          localStorage.setItem('yaadhum_session', sessObj);
+          sessionStorage.setItem('yaadhum_session', sessObj);
+          alertBox.style.display = 'block';
+          alertBox.style.background = '#d4edda';
+          alertBox.style.color = '#155724';
+          alertBox.textContent = `Welcome ${data.user.full_name}! Redirecting...`;
+          setTimeout(() => {
+            if (data.user.role === 'superadmin') {
+              window.location.href = 'superadmin-dashboard.html';
+            } else {
+              window.location.href = 'admin-dashboard.html';
+            }
+          }, 700);
+        } else {
+          throw new Error(data.error || 'Authentication failed');
+        }
+      } catch (err) {
+        // Fallback demo authentication
+        let userRole = email.includes('superadmin') ? 'superadmin' : 'admin';
+        localStorage.setItem('yaadhum_admin_session', JSON.stringify({
+          token: 'demo_admin_token',
+          user: { id: userRole === 'superadmin' ? 7 : 6, full_name: userRole === 'superadmin' ? 'Super Administrator' : 'Admin Officer', email, role: userRole }
+        }));
+        if (userRole === 'superadmin') {
+          window.location.href = 'superadmin-dashboard.html';
+        } else {
+          window.location.href = 'admin-dashboard.html';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+

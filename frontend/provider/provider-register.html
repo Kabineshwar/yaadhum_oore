@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tour Operator Registration | YAADHUM OOORE</title>
+  <link rel="stylesheet" href="../customer/css/customer.css">
+  <link rel="stylesheet" href="css/provider.css">
+  <style>
+    .auth-page-wrapper {
+      min-height: calc(100vh - 140px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: var(--color-warm-ivory);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 540px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      padding: 36px 32px;
+      border: 1px solid rgba(23, 107, 91, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="nav-wrapper">
+        <a href="../index.html" class="brand-logo">
+          <div class="logo-badge">ய</div>
+          <div class="brand-text-group">
+            <span class="brand-title">YAADHUM OOORE</span>
+            <span class="brand-subtitle">Tourism Provider Onboarding</span>
+          </div>
+        </a>
+        <div class="nav-actions">
+          <a href="provider-login.html" class="btn btn-secondary btn-sm">Already Registered? Log In</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-page-wrapper">
+    <div class="auth-card">
+      <div class="auth-header" style="text-align: center; margin-bottom: 24px;">
+        <h1 class="auth-title" style="font-size: 1.6rem; color: var(--color-forest-green); margin-bottom: 6px;">Register as Tour Provider</h1>
+        <p class="auth-subtitle" style="color: #666; font-size: 0.95rem;">Join Tamil Nadu's premiere community tourism network. New agencies are verified by Platform Administrators.</p>
+      </div>
+
+      <div id="registerAlert" class="alert" style="display: none; padding: 12px 16px; border-radius: 6px; margin-bottom: 18px;"></div>
+
+      <form id="providerRegisterForm">
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="display: block; font-weight: 600; margin-bottom: 4px;">Business / Agency Name *</label>
+          <input type="text" id="businessName" class="form-input" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px;" placeholder="e.g. Kongu Eco Trails" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="display: block; font-weight: 600; margin-bottom: 4px;">Contact Person Full Name *</label>
+          <input type="text" id="contactName" class="form-input" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px;" placeholder="e.g. Karthik Selvam" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="display: block; font-weight: 600; margin-bottom: 4px;">Official Email Address *</label>
+          <input type="email" id="providerEmail" class="form-input" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px;" placeholder="contact@agency.in" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="display: block; font-weight: 600; margin-bottom: 4px;">Contact Phone / WhatsApp *</label>
+          <input type="tel" id="providerPhone" class="form-input" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px;" placeholder="9876543210" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label" style="display: block; font-weight: 600; margin-bottom: 4px;">Create Password *</label>
+          <input type="password" id="providerPassword" class="form-input" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px;" placeholder="At least 6 characters" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; padding: 12px; background: var(--color-forest-green); color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+          Submit Application for Approval &rarr;
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: #666;">
+        Already registered? <a href="provider-login.html" style="color: var(--color-terracotta); font-weight: 600;">Sign in to your account</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById('providerRegisterForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const business_name = document.getElementById('businessName').value.trim();
+      const full_name = document.getElementById('contactName').value.trim();
+      const email = document.getElementById('providerEmail').value.trim();
+      const phone = document.getElementById('providerPhone').value.trim();
+      const password = document.getElementById('providerPassword').value;
+      const alertBox = document.getElementById('registerAlert');
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name,
+            email,
+            phone,
+            password,
+            role: 'provider',
+            business_name
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = '#d4edda';
+          alertBox.style.color = '#155724';
+          alertBox.textContent = 'Registration submitted! Please login with your credentials.';
+          setTimeout(() => {
+            window.location.href = 'provider-login.html';
+          }, 1500);
+        } else {
+          throw new Error(data.error || 'Registration failed');
+        }
+      } catch (err) {
+        alertBox.style.display = 'block';
+        alertBox.style.background = '#f8d7da';
+        alertBox.style.color = '#721c24';
+        alertBox.textContent = err.message || 'Error creating provider account.';
+      }
+    });
+  </script>
+</body>
+</html>
+

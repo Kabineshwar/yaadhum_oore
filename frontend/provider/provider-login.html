@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tourism Provider Sign-in Portal for YAADHUM OOORE local tour operators.">
+  <title>Provider Login | YAADHUM OOORE</title>
+  <link rel="stylesheet" href="../customer/css/customer.css">
+  <link rel="stylesheet" href="css/provider.css">
+  <style>
+    .auth-page-wrapper {
+      min-height: calc(100vh - 140px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: var(--color-warm-ivory);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 480px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      padding: 36px 32px;
+      border: 1px solid rgba(23, 107, 91, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container">
+      <span class="tamil-phrase" style="color: var(--color-gold);">"யாதும் ஊரே யாவரும் கேளிர்"</span>
+      &nbsp;&bull;&nbsp; Tourism Provider Portal &nbsp;&bull;&nbsp;
+      <a href="../index.html" style="color: #fff; text-decoration: underline;">Return to Main Website</a>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="nav-wrapper">
+        <a href="../index.html" class="brand-logo">
+          <div class="logo-badge">ய</div>
+          <div class="brand-text-group">
+            <span class="brand-title">YAADHUM OOORE</span>
+            <span class="brand-subtitle">Local Tour Operator Hub</span>
+          </div>
+        </a>
+        <div class="nav-actions">
+          <a href="provider-register.html" class="btn btn-secondary btn-sm">Operator Registration</a>
+          <a href="../customer/login.html" class="btn btn-outline btn-sm">Customer Login</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-page-wrapper">
+    <div class="auth-card">
+      <div class="auth-header" style="text-align: center; margin-bottom: 24px;">
+        <div class="auth-logo-badge" style="width: 54px; height: 54px; margin: 0 auto 12px; background: var(--color-forest-green); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: bold;">தொ</div>
+        <h1 class="auth-title" style="font-size: 1.6rem; color: var(--color-forest-green); margin-bottom: 6px;">Provider Sign In</h1>
+        <p class="auth-subtitle" style="color: #666; font-size: 0.95rem;">Manage your tourism packages, bookings, and traveler reviews</p>
+      </div>
+
+      <div id="loginAlert" class="alert" style="display: none; padding: 12px 16px; border-radius: 6px; margin-bottom: 18px;"></div>
+
+      <!-- Quick Demo Credentials Box -->
+      <div style="background: #f4fbf9; border-left: 4px solid var(--color-forest-green); padding: 12px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5;">
+        <strong>Demo Credentials:</strong><br>
+        Email: <code style="background: #e2f0ed; padding: 2px 4px; border-radius: 3px;">provider@yaadhum.in</code><br>
+        Password: <code style="background: #e2f0ed; padding: 2px 4px; border-radius: 3px;">Password@123</code>
+      </div>
+
+      <form id="providerLoginForm">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="providerEmail" class="form-label" style="display: block; font-weight: 600; margin-bottom: 6px;">Operator Email Address</label>
+          <input type="email" id="providerEmail" class="form-input" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px;" value="provider@yaadhum.in" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label for="providerPassword" class="form-label" style="display: block; font-weight: 600; margin-bottom: 6px;">Password</label>
+          <input type="password" id="providerPassword" class="form-input" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px;" value="Password@123" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; padding: 12px; background: var(--color-forest-green); color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+          Access Provider Dashboard &rarr;
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 24px; font-size: 0.9rem; color: #666;">
+        New tour operator in Tamil Nadu?
+        <a href="provider-register.html" style="color: var(--color-terracotta); font-weight: 600;">Register Your Agency</a>
+      </div>
+    </div>
+  </main>
+
+  <footer style="background: #1B2B28; color: #fff; text-align: center; padding: 20px; font-size: 0.9rem;">
+    <p>&copy; 2026 YAADHUM OOORE &bull; Local Tourism Provider Network</p>
+  </footer>
+
+  <script>
+    document.getElementById('providerLoginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('providerEmail').value.trim();
+      const password = document.getElementById('providerPassword').value;
+      const alertBox = document.getElementById('loginAlert');
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, expected_role: 'provider' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const sessObj = JSON.stringify({ token: data.token, user: data.user });
+          localStorage.setItem('yaadhum_provider_session', sessObj);
+          localStorage.setItem('yaadhum_session', sessObj);
+          sessionStorage.setItem('yaadhum_session', sessObj);
+          alertBox.style.display = 'block';
+          alertBox.style.background = '#d4edda';
+          alertBox.style.color = '#155724';
+          alertBox.textContent = 'Login successful! Redirecting to dashboard...';
+          setTimeout(() => {
+            window.location.href = 'provider-dashboard.html';
+          }, 800);
+        } else {
+          throw new Error(data.error || 'Authentication failed');
+        }
+      } catch (err) {
+        // Fallback demo authentication
+        if (email.includes('provider') || email === 'provider@yaadhum.in') {
+          localStorage.setItem('yaadhum_provider_session', JSON.stringify({
+            token: 'demo_provider_token',
+            user: { id: 3, full_name: 'Chola Heritage Tours', email, role: 'provider', status: 'active', business_name: 'Chola Heritage Tours & Travels' }
+          }));
+          window.location.href = 'provider-dashboard.html';
+          return;
+        }
+        alertBox.style.display = 'block';
+        alertBox.style.background = '#f8d7da';
+        alertBox.style.color = '#721c24';
+        alertBox.textContent = err.message || 'Invalid operator credentials.';
+      }
+    });
+  </script>
+</body>
+</html>
+

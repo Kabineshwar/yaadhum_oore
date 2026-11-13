@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Package Availability - YAADHUM OOORE</title>
+<link rel="stylesheet" href="css/provider.css">
+</head>
+<body>
+<header><h1>YAADHUM OOORE</h1><p>Local Tourism Provider Portal</p></header>
+
+<nav>
+<a href="provider-dashboard.html">Dashboard</a>
+<a href="my-packages.html">My Packages</a>
+<a href="add-package.html">Add Package</a>
+<a href="provider-bookings.html">Bookings</a>
+<a href="package-availability.html">Availability</a>
+<a href="provider-profile.html">Profile</a>
+<a href="provider-reviews.html">Reviews</a>
+<a href="provider-reports.html">Reports</a>
+</nav>
+
+<main>
+
+<h2>Manage Package Availability</h2><p>Set the dates and seat capacity for a package.</p>
+<form id="availabilityForm">
+<label for="package">Select Package</label><select id="package" required><option value="">Select a package</option></select>
+<label for="start">Start Date</label><input type="date" id="start" required>
+<label for="end">End Date</label><input type="date" id="end" required>
+<label for="seats">Total Available Seats</label><input type="number" id="seats" min="1" required>
+<button type="submit">Save Availability</button><p id="message" class="message" aria-live="polite"></p>
+</form>
+<h2>Current Availability</h2><div id="availabilityList" class="cards"></div>
+<p class="note">Availability is stored locally for this frontend demonstration. Server-side seat locking is needed to prevent overbooking in the real application.</p>
+
+</main>
+<footer><p>YAADHUM OOORE | Explore Your World</p></footer>
+<script src="js/provider.js"></script>
+</body>
+</html>

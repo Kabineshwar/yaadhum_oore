@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="YAADHUM OOORE - Discover authentic local tourism packages, cultural destinations, and scenic experiences across Tamil Nadu.">
+  <title>YAADHUM OOORE | Local Tourism Packages & Cultural Experiences</title>
+  
+  <!-- Main Customer Design System -->
+  <link rel="stylesheet" href="customer/css/customer.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container">
+      <span class="tamil-phrase" style="color: var(--color-gold);">"யாதும் ஊரே யாவரும் கேளிர்"</span>
+      &nbsp;&bull;&nbsp; To us all towns are one, all people our kin &nbsp;&bull;&nbsp;
+      <strong>Authentic Local Tourism in Tamil Nadu</strong>
+    </div>
+  </div>
+
+  <!-- Primary Header & Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="nav-wrapper">
+        
+        <!-- Brand Logo -->
+        <a href="index.html" class="brand-logo" aria-label="YAADHUM OOORE Home">
+          <div class="logo-badge">ய</div>
+          <div class="brand-text-group">
+            <span class="brand-title">YAADHUM OOORE</span>
+            <span class="brand-subtitle">Local Tourism Platform</span>
+          </div>
+        </a>
+
+        <!-- Mobile Navigation Toggle -->
+        <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu">
+          &#9776;
+        </button>
+
+        <!-- Main Navigation Links -->
+        <nav class="nav-links" id="mainNav">
+          <a href="index.html" class="nav-link active">Home</a>
+          <a href="customer/destinations.html" class="nav-link">Destinations</a>
+          <a href="customer/packages.html" class="nav-link">Packages</a>
+          <a href="customer/search-packages.html" class="nav-link">Search</a>
+          <a href="customer/compare.html" class="nav-link">Compare</a>
+          <a href="customer/wishlist.html" class="nav-link">Wishlist</a>
+          <a href="#about-section" class="nav-link">About</a>
+        </nav>
+
+        <!-- Navigation Actions (Login / Register) -->
+        <div class="nav-actions">
+          <a href="customer/login.html" class="btn btn-secondary btn-sm">Log In</a>
+          <a href="customer/register.html" class="btn btn-primary btn-sm">Register</a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main id="main-content">
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      
+      <!-- Cultural Badge -->
+      <div class="hero-tag">
+        <span>✦</span> Discover Tamil Nadu Through Local Eyes
+      </div>
+
+      <!-- Hero Heading -->
+      <h1 class="hero-title">
+        Discover Authentic Local Experiences<br>Across Tamil Nadu
+      </h1>
+
+      <!-- Hero Subtitle with Tamil Proverb -->
+      <p class="hero-subtitle">
+        Connect with verified local providers for hand-crafted hill escapes, heritage temple circuits, and vibrant cultural journeys.
+        <span class="hero-tamil-quote">"யாதும் ஊரே யாவரும் கேளிர்"</span>
+      </p>
+
+      <!-- Search Interface -->
+      <div class="hero-search-wrapper">
+        <form action="customer/search-packages.html" method="GET" class="hero-search-box" id="heroSearchForm">
+          
+          <!-- Destination Field -->
+          <div class="search-field">
+            <label for="searchDestination" class="search-field-label">Destination</label>
+            <input type="text" id="searchDestination" name="destination" class="search-field-input" placeholder="Where do you want to explore?" autocomplete="off">
+          </div>
+
+          <div class="search-divider"></div>
+
+          <!-- Category Field -->
+          <div class="search-field">
+            <label for="searchCategory" class="search-field-label">Category</label>
+            <select id="searchCategory" name="category" class="search-field-input">
+              <option value="">All Categories</option>
+              <option value="heritage">Heritage & Temples</option>
+              <option value="hills">Hills & Nature</option>
+              <option value="coastal">Coastal & Beaches</option>
+              <option value="cultural">Culture & Food</option>
+              <option value="adventure">Trekking & Wildlife</option>
+            </select>
+          </div>
+
+          <div class="search-divider"></div>
+
+          <!-- Duration / Budget Filter -->
+          <div class="search-field">
+            <label for="searchDuration" class="search-field-label">Duration</label>
+            <select id="searchDuration" name="duration" class="search-field-input">
+              <option value="">Any Duration</option>
+              <option value="weekend">1 - 2 Days (Weekend)</option>
+              <option value="short">3 - 4 Days</option>
+              <option value="week">5+ Days (Grand Tour)</option>
+            </select>
+          </div>
+
+          <!-- Search Submit Button -->
+          <button type="submit" class="btn btn-terracotta btn-lg">
+            <span>Explore Tours</span> &rarr;
+          </button>
+        </form>
+
+        <!-- Quick Search Tags -->
+        <div class="hero-quick-tags">
+          <span>Popular searches:</span>
+          <a href="customer/search-packages.html?destination=Ooty" class="quick-tag-pill">Ooty</a>
+          <a href="customer/search-packages.html?destination=Madurai" class="quick-tag-pill">Madurai</a>
+          <a href="customer/search-packages.html?destination=Kodaikanal" class="quick-tag-pill">Kodaikanal</a>
+          <a href="customer/search-packages.html?destination=Thanjavur" class="quick-tag-pill">Thanjavur</a>
+          <a href="customer/search-packages.html?destination=Chettinad" class="quick-tag-pill">Chettinad</a>
+          <a href="customer/search-packages.html?destination=Rameswaram" class="quick-tag-pill">Rameswaram</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Popular Travel Categories -->
+  <section class="section">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="section-tagline">Curated Themes</span>
+        <h2 class="section-title">Explore by Travel Experience</h2>
+        <p class="section-desc">
+          Choose a theme that matches your travel rhythm, from serene misty heights to millennium-old architectural wonders.
+        </p>
+      </div>
+
+      <div class="grid-4">
+        
+        <!-- Category 1 -->
+        <a href="customer/packages.html?category=heritage" class="category-card">
+          <div class="category-icon">&#127963;</div>
+          <h3 class="category-name">Heritage & Temples</h3>
+          <span class="category-count">14 Packages</span>
+        </a>
+
+        <!-- Category 2 -->
+        <a href="customer/packages.html?category=hills" class="category-card">
+          <div class="category-icon">&#127956;</div>
+          <h3 class="category-name">Hills & Plantations</h3>
+          <span class="category-count">10 Packages</span>
+        </a>
+
+        <!-- Category 3 -->
+        <a href="customer/packages.html?category=coastal" class="category-card">
+          <div class="category-icon">&#127754;</div>
+          <h3 class="category-name">Coastal Escapes</h3>
+          <span class="category-count">8 Packages</span>
+        </a>
+
+        <!-- Category 4 -->
+        <a href="customer/packages.html?category=cultural" class="category-card">
+          <div class="category-icon">&#127827;</div>
+          <h3 class="category-name">Culinary & Folklore</h3>
+          <span class="category-count">12 Packages</span>
+        </a>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Featured Destinations -->
+  <section class="section section-alt">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="section-tagline">Iconic Locales</span>
+        <h2 class="section-title">Featured Tamil Nadu Destinations</h2>
+        <p class="section-desc">
+          From the Nilgiri blue mountains to Coromandel shores, discover places rich in heritage and local stories.
+        </p>
+      </div>
+
+      <div class="grid-3">
+        
+        <!-- Destination 1: Ooty -->
+        <article class="destination-card">
+          <div class="destination-thumb">
+            <img src="https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80" alt="Scenic tea gardens of Ooty in the Nilgiris" loading="lazy">
+            <span class="destination-badge">Hill Station</span>
+          </div>
+          <div class="destination-info">
+            <h3 class="destination-title">Ooty (Udhagamandalam)</h3>
+            <span class="destination-tamil">உதகமண்டலம் • Nilgiris</span>
+            <p class="destination-desc">
+              Experience misty emerald tea plantations, heritage mountain railway journeys, botanical gardens, and cool pine valleys.
+            </p>
+            <div class="destination-footer">
+              <span>6 Packages Available</span>
+              <a href="customer/packages.html?destination=Ooty" class="btn btn-secondary btn-sm">Explore &rarr;</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Destination 2: Madurai -->
+        <article class="destination-card">
+          <div class="destination-thumb">
+            <img src="https://images.unsplash.com/photo-1609137144822-2615a639b780?auto=format&fit=crop&w=800&q=80" alt="Meenakshi Amman Temple towers in Madurai" loading="lazy">
+            <span class="destination-badge">Cultural Capital</span>
+          </div>
+          <div class="destination-info">
+            <h3 class="destination-title">Madurai</h3>
+            <span class="destination-tamil">மதுரை • City of Jasmine</span>
+            <p class="destination-desc">
+              The soul of Tamil heritage. Explore towering gopurams of Meenakshi Temple, buzzing night markets, and legendary street delicacies.
+            </p>
+            <div class="destination-footer">
+              <span>8 Packages Available</span>
+              <a href="customer/packages.html?destination=Madurai" class="btn btn-secondary btn-sm">Explore &rarr;</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Destination 3: Kodaikanal -->
+        <article class="destination-card">
+          <div class="destination-thumb">
+            <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80" alt="Misty lake and valleys of Kodaikanal" loading="lazy">
+            <span class="destination-badge">Princess of Hills</span>
+          </div>
+          <div class="destination-info">
+            <h3 class="destination-title">Kodaikanal</h3>
+            <span class="destination-tamil">கொடைக்கானல் • Dindigul</span>
+            <p class="destination-desc">
+              Perched atop the Palani Hills with cloud-kissed lakes, rolling pine forests, Pillar Rocks, and breathtaking sunset cliffs.
+            </p>
+            <div class="destination-footer">
+              <span>5 Packages Available</span>
+              <a href="customer/packages.html?destination=Kodaikanal" class="btn btn-secondary btn-sm">Explore &rarr;</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Destination 4: Thanjavur -->
+        <article class="destination-card">
+          <div class="destination-thumb">
+            <img src="https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=800&q=80" alt="Brihadisvara Great Chola Temple in Thanjavur" loading="lazy">
+            <span class="destination-badge">Living Chola Art</span>
+          </div>
+          <div class="destination-info">
+            <h3 class="destination-title">Thanjavur</h3>
+            <span class="destination-tamil">தஞ்சாவூர் • Rice Bowl of Tamil Nadu</span>
+            <p class="destination-desc">
+              Home to the millennium-old Big Temple, Tanjore paintings, brass craftsmanship, and classical South Indian musical traditions.
+            </p>
+            <div class="destination-footer">
+              <span>4 Packages Available</span>
+              <a href="customer/packages.html?destination=Thanjavur" class="btn btn-secondary btn-sm">Explore &rarr;</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Destination 5: Chettinad -->
+        <article class="destination-card">
+          <div class="destination-thumb">
+            <img src="https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=800&q=80" alt="Historic palatial mansion in Chettinad" loading="lazy">
+            <span class="destination-badge">Architecture & Cuisine</span>
+          </div>
+          <div class="destination-info">
+            <h3 class="destination-title">Chettinad (Karaikudi)</h3>
+            <span class="destination-tamil">செட்டிநாடு • Sivaganga</span>
+            <p class="destination-desc">
+              Grand palatial heritage mansions with Burma teak woodwork, Athangudi handmade tiles, and world-renowned spicy cuisine.
+            </p>
+            <div class="destination-footer">
+              <span>4 Packages Available</span>
+              <a href="customer/packages.html?destination=Chettinad" class="btn btn-secondary btn-sm">Explore &rarr;</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Destination 6: Rameswaram -->
+        <article class="destination-card">
+          <div class="destination-thumb">
+            <img src="https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80" alt="Sacred shores and waters of Rameswaram" loading="lazy">
+            <span class="destination-badge">Island Coast</span>
+          </div>
+          <div class="destination-info">
+            <h3 class="destination-title">Rameswaram</h3>
+            <span class="destination-tamil">ராமேஸ்வரம் • Pamban Island</span>
+            <p class="destination-desc">
+              Cross the legendary sea bridge to sacred temple corridors, crystal clear coastal shores, and the ghost town of Dhanushkodi.
+            </p>
+            <div class="destination-footer">
+              <span>5 Packages Available</span>
+              <a href="customer/packages.html?destination=Rameswaram" class="btn btn-secondary btn-sm">Explore &rarr;</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- View All Destinations CTA -->
+      <div class="text-center mt-xl">
+        <a href="customer/destinations.html" class="btn btn-primary btn-lg">
+          View All 15+ Destinations &rarr;
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Featured Tourism Packages -->
+  <section class="section">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="section-tagline">Handpicked Tours</span>
+        <h2 class="section-title">Popular Local Packages</h2>
+        <p class="section-desc">
+          Transparent pricing, guaranteed seat availability, and itineraries crafted by local tour experts.
+        </p>
+      </div>
+
+      <div class="grid-3">
+
+        <!-- Package 1 -->
+        <article class="package-card">
+          <div class="package-media">
+            <img src="https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80" alt="Ooty Tea Garden Tour" loading="lazy">
+            <span class="package-tag">Best Seller</span>
+            <button type="button" class="package-wishlist-btn" title="Add to Wishlist" data-package-id="1">
+              &hearts;
+            </button>
+          </div>
+          <div class="package-body">
+            <div class="package-meta">
+              <span class="package-meta-item">&#128197; 3 Days, 2 Nights</span>
+              <span class="package-meta-item">&#128101; Max 12 Seats</span>
+            </div>
+            <h3 class="package-title">
+              <a href="customer/package-details.html?id=1">Nilgiri Heritage Express & Tea Estate Trail</a>
+            </h3>
+            <div class="package-rating">
+              <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+              <span class="rating-count">4.9 (48 reviews)</span>
+            </div>
+            <div class="package-price-row">
+              <div class="price-box">
+                <span class="price-label">Starting From</span>
+                <span class="price-amount">&#8377;4,499 <small style="font-size:0.75rem; font-weight:normal;">/ person</small></span>
+              </div>
+              <a href="customer/package-details.html?id=1" class="btn btn-primary btn-sm">Details &rarr;</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Package 2 -->
+        <article class="package-card">
+          <div class="package-media">
+            <img src="https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=800&q=80" alt="Brihadisvara Temple Tour" loading="lazy">
+            <span class="package-tag">Heritage</span>
+            <button type="button" class="package-wishlist-btn" title="Add to Wishlist" data-package-id="2">
+              &hearts;
+            </button>
+          </div>
+          <div class="package-body">
+            <div class="package-meta">
+              <span class="package-meta-item">&#128197; 2 Days, 1 Night</span>
+              <span class="package-meta-item">&#128101; Max 16 Seats</span>
+            </div>
+            <h3 class="package-title">
+              <a href="customer/package-details.html?id=2">Great Living Chola Temples & Art Circuit</a>
+            </h3>
+            <div class="package-rating">
+              <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
+              <span class="rating-count">4.8 (32 reviews)</span>
+            </div>
+            <div class="package-price-row">
+              <div class="price-box">
+                <span class="price-label">Starting From</span>
+                <span class="price-amount">&#8377;2,999 <small style="font-size:0.75rem; font-weight:normal;">/ person</small></span>
+              </div>
+              <a href="customer/package-details.html?id=2" class="btn btn-primary btn-sm">Details &rarr;</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Package 3 -->
+        <article class="package-card">
+          <div class="package-media">
+            <img src="https://images.unsplash.com/photo-1609137144822-2615a639b780?auto=format&fit=crop&w=800&q=80" alt="Madurai Meenakshi Temple tour" loading="lazy">
+            <span class="package-tag">Culinary & Culture</span>
+            <button type="button" class="package-wishlist-btn" title="Add to Wishlist" data-package-id="3">
+              &hearts;
+            </button>
+          </div>
+          <div class="package-body">
+            <div class="package-meta">
+              <span class="package-meta-item">&#128197; 2 Days, 1 Night</span>
+              <span class="package-meta-item">&#128101; Max 10 Seats</span>
+            </div>
+            <h3 class="package-title">
+              <a href="customer/package-details.html?id=3">Madurai Night Food Trail & Meenakshi Immersion</a>
+            </h3>
+            <div class="package-rating">
+              <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+              <span class="rating-count">4.9 (56 reviews)</span>
+            </div>
+            <div class="package-price-row">
+              <div class="price-box">
+                <span class="price-label">Starting From</span>
+                <span class="price-amount">&#8377;2,200 <small style="font-size:0.75rem; font-weight:normal;">/ person</small></span>
+              </div>
+              <a href="customer/package-details.html?id=3" class="btn btn-primary btn-sm">Details &rarr;</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Browse All Packages CTA -->
+      <div class="text-center mt-xl">
+        <a href="customer/packages.html" class="btn btn-terracotta btn-lg">
+          Browse All Available Packages &rarr;
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Cultural Heritage Showcase Section (The Soul of YAADHUM OOORE) -->
+  <section class="section section-alt" id="about-section">
+    <div class="container">
+      
+      <div class="heritage-callout">
+        <div class="heritage-content">
+          <span class="section-tagline" style="color: var(--color-gold);">Our Cultural Foundation</span>
+          <h2>The Spirit of YAADHUM OOORE</h2>
+          <p>
+            YAADHUM OOORE draws its name and essence from the celebrated Sangam Tamil poet Kaniyan Pungundranar's timeless verses in the Purananuru:
+          </p>
+
+          <div class="heritage-quote-box">
+            <blockquote>"யாதும் ஊரே யாவரும் கேளிர்"</blockquote>
+            <cite>To us, every town is our hometown, and all people are our kin.</cite>
+          </div>
+
+          <p>
+            Our mission is to celebrate this welcoming spirit by directly connecting travellers with authentic local providers across Tamil Nadu. We empower small travel operators, grassroots guides, and village artisans while offering tourists unforgettable, respectful, and transparent travel experiences.
+          </p>
+
+          <div class="d-flex gap-md" style="flex-wrap: wrap;">
+            <a href="customer/packages.html" class="btn btn-gold">Explore Local Tours</a>
+            <a href="customer/register.html" class="btn btn-outline-light">Join as a Traveller</a>
+          </div>
+        </div>
+
+        <div class="heritage-highlights" style="display: flex; flex-direction: column; gap: 16px;">
+          
+          <div class="feature-box" style="background: rgba(255,255,255,0.92);">
+            <h4 class="feature-title">&#128081; Authentic Living Heritage</h4>
+            <p class="feature-desc">Experience ancient temple rituals, traditional bronze casting, and handloom weaving directly from generational custodians.</p>
+          </div>
+
+          <div class="feature-box" style="background: rgba(255,255,255,0.92);">
+            <h4 class="feature-title">&#128106; Community-Rooted Guides</h4>
+            <p class="feature-desc">Every tour is hosted by verified local guides who know every hidden valley, folklore tale, and local food corner.</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Why Choose YAADHUM OOORE -->
+  <section class="section">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="section-tagline">Why Travel With Us</span>
+        <h2 class="section-title">Designed for Travellers, Rooted in Trust</h2>
+        <p class="section-desc">
+          We bring transparency, safety, and cultural richness to local tourism booking.
+        </p>
+      </div>
+
+      <div class="grid-3">
+
+        <!-- Feature 1 -->
+        <div class="feature-box">
+          <div class="feature-icon-badge">&#128737;</div>
+          <h3 class="feature-title">Verified Local Providers</h3>
+          <p class="feature-desc">
+            All tourism operators and packages are vetted by our platform administrators to guarantee passenger safety and authentic hospitality.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-box">
+          <div class="feature-icon-badge">&#128179;</div>
+          <h3 class="feature-title">Clear, Transparent Pricing</h3>
+          <p class="feature-desc">
+            No hidden agent markups or surprise fees. See complete breakdowns of inclusions, travel tickets, and day-wise itineraries upfront.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-box">
+          <div class="feature-icon-badge">&#9878;</div>
+          <h3 class="feature-title">Package Comparison Tool</h3>
+          <p class="feature-desc">
+            Compare up to 4 packages side-by-side on duration, inclusions, itinerary highlights, and prices to make the best choice.
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-box">
+          <div class="feature-icon-badge">&#128197;</div>
+          <h3 class="feature-title">Real-Time Seat Quotas</h3>
+          <p class="feature-desc">
+            Reliable capacity management ensures you never experience overbooking or unconfirmed bookings on high-demand dates.
+          </p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-box">
+          <div class="feature-icon-badge">&#127774;</div>
+          <h3 class="feature-title">Local Pulse & Advisories</h3>
+          <p class="feature-desc">
+            Stay informed with real-time local updates on temple festivals, monsoon weather advisories, and destination timings.
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-box">
+          <div class="feature-icon-badge">&#128172;</div>
+          <h3 class="feature-title">Genuine Customer Reviews</h3>
+          <p class="feature-desc">
+            Read verified customer feedback and star ratings from travellers who have completed their journeys with our local partners.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Customer Testimonials (Identified Sample Demonstrations) -->
+  <section class="section section-alt">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="section-tagline">Traveller Voices</span>
+        <h2 class="section-title">Loved by Curious Travellers</h2>
+        <p class="section-desc">
+          See how YAADHUM OOORE helped travellers explore Tamil Nadu's true wonders.
+          <br><small style="color: var(--color-text-light); font-size: 0.8rem;">(* Sample testimonials for academic platform demonstration)</small>
+        </p>
+      </div>
+
+      <div class="grid-3">
+
+        <!-- Testimonial 1 -->
+        <div class="testimonial-card">
+          <p class="testimonial-quote">
+            "The Ooty tea estate trail was magical! Our local provider took us to an artisanal organic tea plantation that ordinary bus tours completely miss. Transparent booking and no surprises."
+          </p>
+          <div class="testimonial-user">
+            <div class="user-avatar">SR</div>
+            <div class="user-meta">
+              <span class="user-name">Suresh Ramanathan</span>
+              <span class="user-city">Chennai, TN</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="testimonial-card">
+          <p class="testimonial-quote">
+            "The package comparison tool made it so easy for our college friends group to evaluate 3 different Kodaikanal trekking packages. Booking was smooth and fast!"
+          </p>
+          <div class="testimonial-user">
+            <div class="user-avatar" style="background: var(--color-terracotta);">AK</div>
+            <div class="user-meta">
+              <span class="user-name">Ananya Krishnan</span>
+              <span class="user-city">Bengaluru, KA</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="testimonial-card">
+          <p class="testimonial-quote">
+            "Exploring the Madurai food walk through a certified local guide was the highlight of our Tamil Nadu visit. Having verified itineraries and genuine cancellation terms gave us peace of mind."
+          </p>
+          <div class="testimonial-user">
+            <div class="user-avatar" style="background: var(--color-gold-dark);">VD</div>
+            <div class="user-meta">
+              <span class="user-name">Vignesh Dharmaraj</span>
+              <span class="user-city">Coimbatore, TN</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        
+        <!-- Brand & Mission Column -->
+        <div class="footer-col">
+          <h3 class="footer-brand-title">YAADHUM OOORE</h3>
+          <p class="footer-tagline">"யாதும் ஊரே யாவரும் கேளிர்"</p>
+          <p class="footer-desc">
+            A database-driven local tourism package booking platform promoting authentic cultural exploration, heritage preservation, and sustainable community tourism across Tamil Nadu.
+          </p>
+        </div>
+
+        <!-- Quick Links Column -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html" class="footer-link">Home</a></li>
+            <li><a href="customer/destinations.html" class="footer-link">Browse Destinations</a></li>
+            <li><a href="customer/packages.html" class="footer-link">Tourism Packages</a></li>
+            <li><a href="customer/search-packages.html" class="footer-link">Search & Filter</a></li>
+            <li><a href="customer/compare.html" class="footer-link">Compare Tours</a></li>
+          </ul>
+        </div>
+
+        <!-- Customer Hub Column -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">Customer Hub</h4>
+          <ul class="footer-links">
+            <li><a href="customer/login.html" class="footer-link">Customer Login</a></li>
+            <li><a href="customer/register.html" class="footer-link">Create Account</a></li>
+            <li><a href="customer/customer-dashboard.html" class="footer-link">My Dashboard</a></li>
+            <li><a href="customer/my-bookings.html" class="footer-link">My Bookings</a></li>
+            <li><a href="customer/wishlist.html" class="footer-link">Saved Wishlist</a></li>
+          </ul>
+        </div>
+
+        <!-- Partner Portals Column -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">Platform Portals</h4>
+          <ul class="footer-links">
+            <li><a href="provider/provider-login.html" class="footer-link">Provider Sign In</a></li>
+            <li><a href="provider/provider-register.html" class="footer-link">Operator Registration</a></li>
+            <li><a href="admin/admin-login.html" class="footer-link">Administrator Portal</a></li>
+            <li><a href="admin/superadmin-dashboard.html" class="footer-link">Super Admin Console</a></li>
+          </ul>
+          <p style="margin-top: 14px; font-size: 0.8rem; color: #8CA39C;">
+            Web Technology Academic Project &bull; Team YAADHUM OOORE
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Footer Bottom Copyright & Bar -->
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 <strong>YAADHUM OOORE</strong>. All rights reserved.
+        </div>
+        <div class="portal-links">
+          <a href="customer/destinations.html" class="portal-link">Destinations</a>
+          <span>&bull;</span>
+          <a href="customer/packages.html" class="portal-link">Packages</a>
+          <span>&bull;</span>
+          <a href="provider/provider-login.html" class="portal-link">Provider Hub</a>
+          <span>&bull;</span>
+          <a href="admin/admin-login.html" class="portal-link">Admin Console</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Basic Vanilla JS for Responsive Toggle & Interactive Enhancements -->
+  <script>
+    // Responsive Navigation Toggle
+    const mobileToggle = document.getElementById('mobileNavToggle');
+    const mainNav = document.getElementById('mainNav');
+
+    if (mobileToggle && mainNav) {
+      mobileToggle.addEventListener('click', function() {
+        mainNav.classList.toggle('is-open');
+      });
+    }
+
+    // Wishlist Heart Button Demo Toggle
+    const wishlistBtns = document.querySelectorAll('.package-wishlist-btn');
+    wishlistBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.toggle('active');
+        const pkgId = this.getAttribute('data-package-id');
+        const isAdded = this.classList.contains('active');
+        
+        // Update local wishlist state for prototype demonstration
+        let wishlist = JSON.parse(localStorage.getItem('yaadhum_wishlist') || '[]');
+        if (isAdded) {
+          if (!wishlist.includes(pkgId)) wishlist.push(pkgId);
+        } else {
+          wishlist = wishlist.filter(id => id !== pkgId);
+        }
+        localStorage.setItem('yaadhum_wishlist', JSON.stringify(wishlist));
+      });
+    });
+
+    // Sync initial wishlist state from localStorage
+    try {
+      const savedWishlist = JSON.parse(localStorage.getItem('yaadhum_wishlist') || '[]');
+      savedWishlist.forEach(id => {
+        const btn = document.querySelector(`.package-wishlist-btn[data-package-id="${id}"]`);
+        if (btn) btn.classList.add('active');
+      });
+    } catch(err) {
+      console.warn('LocalStorage access error:', err);
+    }
+  </script>
+
+</body>
+</html>
